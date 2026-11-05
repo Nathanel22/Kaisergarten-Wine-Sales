@@ -1,0 +1,36 @@
+node_modules
+dist
+dist-ssr
+*.local
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local secrets (examples must contain placeholders only)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+.ssh/
+
+# Logs, caches and generated verification output
+*.log
+*.tsbuildinfo
+coverage/
+.vite/
+playwright-report/
+test-results/
+
+# Local design handover and screenshots are not publication sources
+/design/
+/docs/*.png

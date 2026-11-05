@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#822037"/>
+      <stop offset="100%" stop-color="#400a16"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e7dcba"/>
+      <stop offset="50%" stop-color="#c5a059"/>
+      <stop offset="100%" stop-color="#986e36"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <!-- Wine Glass & Grape Crown -->
+  <g transform="translate(106, 96)" stroke="url(#gold)" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 60 40 C 60 160 240 160 240 40 Z" fill="#6f1e31" fill-opacity="0.5"/>
+    <line x1="150" y1="160" x2="150" y2="280"/>
+    <line x1="90" y1="280" x2="210" y2="280"/>
+    <!-- Crown / Stars -->
+    <path d="M 150 10 L 160 30 L 180 30 L 165 42 L 170 62 L 150 50 L 130 62 L 135 42 L 120 30 L 140 30 Z" fill="url(#gold)"/>
+  </g>
+</svg>
