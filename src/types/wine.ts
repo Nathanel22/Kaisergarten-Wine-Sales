@@ -1,20 +1,34 @@
-export type WineCategory = 'all' | 'red' | 'white' | 'rose' | 'sparkling' | 'special';
+export type WineCategory = 'all' | 'red' | 'white' | 'rose' | 'sparkling' | 'dessert' | 'spirits' | 'special';
 
 export interface Wine {
   id: string;
   name: string;
   subTitle?: string;
-  category: 'red' | 'white' | 'rose' | 'sparkling' | 'special';
-  vintage: number;
+  category: Exclude<WineCategory, 'all'>;
+  vintage: number | null;
   grapeVariety: string;
   region: string;
   appellation?: string;
-  bottleSizeCl: number; // e.g. 75
-  alcoholVol: number; // e.g. 13.5
-  priceCHF: number; // Single bottle price in CHF
-  caseSize: number; // e.g. 6
-  casePriceCHF: number; // Price for 6 bottles (can include carton discount)
-  stockQty: number; // Demo inventory
+  bottleSizeCl: number | null;
+  alcoholVol: number | null;
+  priceCHF: number | null; // null means unknown, never a free product
+  caseSize: number | null;
+  casePriceCHF: number | null;
+  stockQty: number | null;
+  country?: string;
+  flavor?: string;
+  residualSugarGL?: number | null;
+  acidityGL?: number | null;
+  alcoholNote?: string;
+  packagingNote?: string;
+  sourceId?: string;
+  sourceUrl?: string;
+  sourceCategory?: string;
+  originalImageUrl?: string | null;
+  downloadedImageUrl?: string | null;
+  rawAttributes?: Record<string, string | undefined>;
+  dataIssues?: string[];
+  cartonRule?: 'standard-6' | 'unconfirmed' | 'excluded';
   description: string;
   tastingNotes: {
     color: string;
@@ -26,9 +40,11 @@ export interface Wine {
   servingTempC: string;
   agingPotential: string;
   awards?: string[];
-  imageUrl?: string;
+  imageUrl?: string | null;
   badge?: string; // e.g. "Bestseller", "Messe-Favorit", "Gold-Medaille"
 }
+
+export type PricedWine = Wine & { priceCHF: number };
 
 export interface WineFilterState {
   category: WineCategory;

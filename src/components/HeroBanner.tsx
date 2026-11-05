@@ -16,7 +16,7 @@ export const HeroBanner: React.FC = () => (
         <span className="inline-flex items-center gap-2 rounded-full bg-gold-50 px-3 py-2"><Package className="h-4 w-4" aria-hidden="true" />Flaschen & Kartons wählen</span>
         <span className="inline-flex items-center gap-2 rounded-full bg-creme-100 px-3 py-2"><ShoppingBag className="h-4 w-4" aria-hidden="true" />Warenkorb zusammenstellen</span>
       </div>
-      <p className="mt-4 text-xs text-stone-500">Demo-Katalog · Produktangaben, Preise und Konditionen sind Beispieldaten.</p>
+      <p className="mt-4 text-xs text-stone-500">Offizielles Sortiment · Stand 06.11.2026 · Präsentationsdemo ohne echte Bestellungen.</p>
     </div>
   </section>
 );

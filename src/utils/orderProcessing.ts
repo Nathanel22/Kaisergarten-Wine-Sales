@@ -34,10 +34,17 @@ export function validateOrderParams(params: CreateOrderParams): OrderValidationR
 
   let totalWineBottles = 0;
   for (const item of params.items) {
+    if (typeof item.wine.priceCHF !== 'number' || !Number.isFinite(item.wine.priceCHF) || item.wine.priceCHF <= 0) {
+      errors.push(`Preis noch nicht hinterlegt: ${item.wine.name}`);
+    }
+    if (item.wine.sourceId && (item.wine.cartonRule !== 'standard-6' || item.wine.caseSize !== 6)) {
+      errors.push(`Gebinde und Bestellfreigabe noch nicht bestätigt: ${item.wine.name}`);
+    }
+
     if (!Number.isSafeInteger(item.quantity) || item.quantity <= 0) {
       errors.push(`Ungültige Menge für Produkt "${item.wine.name}": ${item.quantity}`);
     }
-    if (item.wine.category !== 'special') {
+    if (item.wine.cartonRule ? item.wine.cartonRule === 'standard-6' : !['special', 'spirits', 'dessert'].includes(item.wine.category)) {
       totalWineBottles += item.quantity;
     }
   }
@@ -130,7 +137,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
 
   for (const item of params.items) {
     totalBottles += item.quantity;
-    if (item.wine.category !== 'special') {
+    if (item.wine.cartonRule ? item.wine.cartonRule === 'standard-6' : !['special', 'spirits', 'dessert'].includes(item.wine.category)) {
       totalWineBottles += item.quantity;
     }
 

@@ -22,6 +22,7 @@ export const Navbar: React.FC = () => {
               fairContext ? 'bg-emerald-400' : 'bg-amber-400'
             }`}
           />
+          <strong className="rounded bg-gold-200 px-2 py-0.5 text-wine-950">DEMO – keine echten Bestellungen</strong>
           <span>{fairContext?.fairName ?? 'Keine aktive Messe zugewiesen'}</span>
           <span className="text-stone-400">|</span>
           <span className="text-stone-300">{fairContext?.booth ?? 'Kein Stand zugewiesen'}</span>

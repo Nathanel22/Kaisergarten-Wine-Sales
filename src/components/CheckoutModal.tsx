@@ -164,6 +164,8 @@ export const CheckoutModal: React.FC = () => {
             category: i.wine.category,
             caseSize: i.wine.caseSize,
             casePriceCHF: i.wine.casePriceCHF,
+            sourceId: i.wine.sourceId,
+            cartonRule: i.wine.cartonRule,
           },
           quantity: i.quantity,
         })),

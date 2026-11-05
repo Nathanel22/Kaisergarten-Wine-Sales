@@ -3,9 +3,9 @@ import { Customer } from './customer';
 export interface OrderItemSnapshot {
   readonly wineId: string;
   readonly name: string;
-  readonly vintage: number;
+  readonly vintage: number | null;
   readonly grapeVariety: string;
-  readonly bottleSizeCl: number;
+  readonly bottleSizeCl: number | null;
   readonly quantity: number;
   readonly unitPriceRappen: number;
   readonly unitPriceCHF: number;
@@ -68,13 +68,15 @@ export interface CreateOrderParams {
     wine: {
       id: string;
       name: string;
-      vintage: number;
+      vintage: number | null;
       grapeVariety: string;
-      bottleSizeCl: number;
+      bottleSizeCl: number | null;
       priceCHF: number;
       category: string;
-      caseSize?: number;
-      casePriceCHF?: number;
+      sourceId?: string;
+      cartonRule?: 'standard-6' | 'unconfirmed' | 'excluded';
+      caseSize?: number | null;
+      casePriceCHF?: number | null;
     };
     quantity: number;
   }[];

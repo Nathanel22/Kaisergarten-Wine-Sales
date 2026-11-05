@@ -9,12 +9,14 @@ interface CategoryFilterProps {
 }
 
 const CATEGORIES: { id: WineCategory; label: string; icon: string }[] = [
-  { id: 'all', label: 'Alle Weine', icon: '🍷' },
+  { id: 'all', label: 'Alle Produkte', icon: '🍷' },
   { id: 'red', label: 'Rotweine', icon: '🍇' },
   { id: 'white', label: 'Weissweine', icon: '🥂' },
   { id: 'rose', label: 'Rosé', icon: '🌸' },
   { id: 'sparkling', label: 'Schaumweine', icon: '🍾' },
-  { id: 'special', label: 'Edelsüss', icon: '✨' },
+  { id: 'dessert', label: 'Dessertweine & Liköre', icon: '✨' },
+  { id: 'spirits', label: 'Spirituosen', icon: '🥃' },
+  { id: 'special', label: 'Weitere Artikel', icon: '◇' },
 ];
 
 export const CategoryFilter: React.FC<CategoryFilterProps> = ({

@@ -9,7 +9,8 @@ import { TabletQuickBar } from './components/TabletQuickBar';
 import { CheckoutModal } from './components/CheckoutModal';
 import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { OrderHistoryModal } from './components/OrderHistoryModal';
-import { MOCK_WINES } from './data/mockWines';
+import { CATALOG } from './data/catalog';
+import { filterCatalog } from './utils/catalog';
 import { WineFilterState } from './types/wine';
 import { Wine as WineIcon, Search } from 'lucide-react';
 
@@ -20,51 +21,7 @@ export function App() {
     sortBy: 'featured',
   });
 
-  // Filter & Sort Logic
-  const filteredWines = useMemo(() => {
-    let list = [...MOCK_WINES];
-
-    // Category filter
-    if (filter.category !== 'all') {
-      list = list.filter((w) => w.category === filter.category);
-    }
-
-    // Search query filter (name, grape variety, region, appellation, vintage)
-    if (filter.searchQuery.trim() !== '') {
-      const q = filter.searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (w) =>
-          w.name.toLowerCase().includes(q) ||
-          w.grapeVariety.toLowerCase().includes(q) ||
-          w.region.toLowerCase().includes(q) ||
-          (w.appellation && w.appellation.toLowerCase().includes(q)) ||
-          w.vintage.toString().includes(q) ||
-          w.description.toLowerCase().includes(q)
-      );
-    }
-
-    // Sorting
-    switch (filter.sortBy) {
-      case 'price-asc':
-        list.sort((a, b) => a.priceCHF - b.priceCHF);
-        break;
-      case 'price-desc':
-        list.sort((a, b) => b.priceCHF - a.priceCHF);
-        break;
-      case 'name-asc':
-        list.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'vintage-desc':
-        list.sort((a, b) => b.vintage - a.vintage);
-        break;
-      case 'featured':
-      default:
-        // Keep initial curated order
-        break;
-    }
-
-    return list;
-  }, [filter]);
+  const filteredWines = useMemo(() => filterCatalog(CATALOG, filter), [filter]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] pb-24 sm:pb-28">
@@ -82,6 +39,8 @@ export function App() {
           onFilterChange={setFilter}
           totalResultsCount={filteredWines.length}
         />
+
+        <p className="text-sm text-stone-600 mb-5">Offizieller Produktkatalog · Preise und Gebinde werden noch bestätigt. Derzeit sind keine Artikel bestellbar.</p>
 
         {/* Wine Catalog Grid */}
         {filteredWines.length > 0 ? (

@@ -1,3 +1,5 @@
+import { ProductImage } from './ProductImage';
+import { isOrderableWine, orderabilityMessage } from '../utils/catalog';
 import React from 'react';
 import { Wine } from '../types/wine';
 import { useCart } from '../context/CartContext';
@@ -45,18 +47,21 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
           indicator: 'bg-gold-500',
           badgeText: 'Schaumwein',
         };
+      case 'dessert':
+      case 'spirits':
       case 'special':
         return {
           bottleBg: 'from-amber-200 via-yellow-300 to-amber-400',
           accent: 'text-amber-950 bg-amber-100 border-amber-300',
           indicator: 'bg-amber-600',
-          badgeText: 'Edelsüss',
+          badgeText: wine.sourceCategory || 'Weitere Artikel',
         };
     }
   };
 
   const style = getCategoryStyles();
-  const caseSavings = wine.casePriceCHF
+  const orderable = isOrderableWine(wine);
+  const caseSavings = wine.casePriceCHF && wine.priceCHF != null && wine.caseSize
     ? wine.priceCHF * wine.caseSize - wine.casePriceCHF
     : 0;
 
@@ -70,7 +75,7 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
         <div className="flex items-center justify-between gap-2 mb-3">
           <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${style.accent}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${style.indicator}`} />
-            {style.badgeText} • {wine.vintage}
+            {style.badgeText}{wine.vintage != null ? ` • ${wine.vintage}` : ''}
           </span>
           {wine.badge && (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-gold-400/20 text-gold-800 border border-gold-300">
@@ -83,22 +88,10 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
         {/* Visual Bottle Representation */}
         <div 
           onClick={() => setSelectedWineForModal(wine)}
-          className="group cursor-pointer relative h-36 rounded-xl bg-gradient-to-b from-stone-50 to-stone-100/60 border border-stone-100 flex items-center justify-center p-3 mb-4 overflow-hidden"
-          title="Klicken für Degustationsnotizen"
+          className="group cursor-pointer relative h-48 rounded-xl bg-gradient-to-b from-stone-50 to-stone-100/60 border border-stone-100 flex items-center justify-center p-3 mb-4 overflow-hidden"
+          title="Produktdetails öffnen"
         >
-          {/* Stylized bottle silhouette */}
-          <div className="relative flex flex-col items-center group-hover:scale-105 transition-transform duration-300">
-            {/* Bottle neck */}
-            <div className={`w-3.5 h-8 rounded-t-sm bg-gradient-to-r ${style.bottleBg} shadow-sm border-t border-gold-400/50`} />
-            {/* Bottle body */}
-            <div className={`w-12 h-20 rounded-t-lg rounded-b-md bg-gradient-to-r ${style.bottleBg} shadow-md flex items-center justify-center relative p-1`}>
-              {/* Label */}
-              <div className="w-9 h-11 bg-creme-50/95 rounded-sm p-0.5 text-center flex flex-col items-center justify-center shadow-inner">
-                <span className="text-[6px] tracking-widest text-stone-700 font-serif uppercase">KG</span>
-                <span className="text-[5px] text-wine-900 font-bold truncate max-w-full">{wine.vintage}</span>
-              </div>
-            </div>
-          </div>
+          <ProductImage wine={wine} />
 
           <button 
             type="button"
@@ -122,11 +115,7 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
           </p>
 
           <div className="flex items-center gap-2 text-xs text-stone-600 mb-3 font-mono">
-            <span>{wine.region}</span>
-            <span>•</span>
-            <span>{wine.bottleSizeCl} cl</span>
-            <span>•</span>
-            <span>{wine.alcoholVol}% Vol.</span>
+            <span>{[wine.country, wine.region, wine.bottleSizeCl != null ? `${wine.bottleSizeCl} cl` : '', wine.alcoholVol != null ? `${wine.alcoholVol}% Vol.` : ''].filter(Boolean).join(' · ') || 'Herkunft nicht angegeben'}</span>
           </div>
 
           <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed h-8">
@@ -141,10 +130,10 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
         <div className="flex items-baseline justify-between mb-3">
           <div>
             <div className="text-[10px] uppercase font-semibold text-stone-500">
-              Einzelflasche
+              Preis
             </div>
             <div className="text-xl font-bold font-mono text-stone-900">
-              {formatCHF(wine.priceCHF)}
+              {wine.priceCHF != null ? formatCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
             </div>
           </div>
           {wine.casePriceCHF && (
@@ -159,6 +148,7 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
           )}
         </div>
 
+        {!orderable && <p className="text-xs text-stone-500 mb-3">{wine.priceCHF == null ? 'Derzeit nicht bestellbar.' : orderabilityMessage(wine)}</p>}
         {/* Action buttons (Large touch targets for tablet) */}
         <div className="space-y-2">
           {/* Stepper row */}
@@ -178,7 +168,8 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => addItem(wine, 1)}
+                  disabled={!orderable}
+                onClick={() => addItem(wine, 1)}
                   className="w-9 h-10 rounded-lg flex items-center justify-center text-white bg-wine-900 hover:bg-wine-950 active:scale-95 transition-all shadow-sm"
                   aria-label="Eine Flasche hinzufügen"
                 >
@@ -188,8 +179,9 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
             ) : (
               <button
                 type="button"
+                disabled={!orderable}
                 onClick={() => addItem(wine, 1)}
-                className="flex-1 h-11 flex items-center justify-center gap-1.5 rounded-xl bg-white border border-stone-300 hover:border-wine-800 hover:text-wine-900 text-stone-800 text-xs sm:text-sm font-semibold active:scale-95 transition-all shadow-sm"
+                className="disabled:opacity-40 disabled:cursor-not-allowed flex-1 h-11 flex items-center justify-center gap-1.5 rounded-xl bg-white border border-stone-300 hover:border-wine-800 hover:text-wine-900 text-stone-800 text-xs sm:text-sm font-semibold active:scale-95 transition-all shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>+1 Fl.</span>
@@ -199,19 +191,21 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
             {/* Quick 6-pack button */}
             <button
               type="button"
-              onClick={() => addCase(wine)}
-              className="h-11 px-2.5 sm:px-3 rounded-xl bg-gold-400/20 hover:bg-gold-400/30 border border-gold-400/50 text-gold-950 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0"
+              disabled={!orderable}
+                onClick={() => addCase(wine)}
+              className="disabled:opacity-40 disabled:cursor-not-allowed h-11 px-2.5 sm:px-3 rounded-xl bg-gold-400/20 hover:bg-gold-400/30 border border-gold-400/50 text-gold-950 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0"
               title={`Sofort 1 Karton (${wine.caseSize} Flaschen) hinzufügen`}
             >
               <Package className="w-3.5 h-3.5 text-gold-800" />
-              <span>+{wine.caseSize}</span>
+              <span>+{wine.caseSize ?? 6}</span>
             </button>
 
             {/* Quick 12-pack button */}
             <button
               type="button"
-              onClick={() => addDoubleCase(wine)}
-              className="h-11 px-2.5 sm:px-3 rounded-xl bg-gold-400/30 hover:bg-gold-400/40 border border-gold-500/50 text-gold-950 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0"
+              disabled={!orderable}
+                onClick={() => addDoubleCase(wine)}
+              className="disabled:opacity-40 disabled:cursor-not-allowed h-11 px-2.5 sm:px-3 rounded-xl bg-gold-400/30 hover:bg-gold-400/40 border border-gold-500/50 text-gold-950 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0"
               title="Sofort 2 Kartons (12 Flaschen) hinzufügen"
             >
               <Package className="w-3.5 h-3.5 text-gold-800" />

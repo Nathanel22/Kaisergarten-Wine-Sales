@@ -1,7 +1,9 @@
+import { ProductImage } from './ProductImage';
+import { isOrderableWine } from '../utils/catalog';
 import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { formatCHF } from '../utils/formatters';
-import { X, Award, Utensils, Thermometer, Clock, Wine as WineIcon, Package, Plus, Check } from 'lucide-react';
+import { X, Package, Plus, Check } from 'lucide-react';
 
 export const WineDetailModal: React.FC = () => {
   const { selectedWineForModal, setSelectedWineForModal, addItem, addCase, addDoubleCase, items } = useCart();
@@ -25,6 +27,7 @@ export const WineDetailModal: React.FC = () => {
   if (!selectedWineForModal) return null;
 
   const wine = selectedWineForModal;
+  const orderable = isOrderableWine(wine);
   const inCart = items.find((i) => i.wine.id === wine.id);
   const cartQty = inCart?.quantity || 0;
 
@@ -50,7 +53,7 @@ export const WineDetailModal: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="text-xs uppercase tracking-widest font-mono text-gold-300 bg-gold-500/20 px-2.5 py-0.5 rounded-full border border-gold-400/30">
-              {wine.appellation || wine.region} • {wine.vintage}
+              {[wine.sourceCategory, wine.country, wine.vintage].filter(Boolean).join(' · ')}
             </span>
             {wine.badge && (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gold-400 text-stone-950">
@@ -69,116 +72,38 @@ export const WineDetailModal: React.FC = () => {
 
         {/* Scrollable Body */}
         <div className="p-6 sm:p-7 overflow-y-auto space-y-6">
-          {/* Awards if present */}
-          {wine.awards && wine.awards.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-3 bg-gold-50/80 rounded-xl border border-gold-200">
-              <Award className="w-5 h-5 text-gold-700 shrink-0 mt-0.5" />
-              <div className="flex-1 space-y-1">
-                <div className="text-xs font-bold uppercase tracking-wider text-gold-900">
-                  Prämierungen & Auszeichnungen
-                </div>
-                <div className="text-xs text-gold-950 font-medium space-x-2">
-                  {wine.awards.map((a, i) => (
-                    <span key={i} className="inline-block bg-white/90 px-2 py-0.5 rounded border border-gold-300/60 shadow-2xs">
-                      ★ {a}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Description */}
+          <div className="h-64 rounded-xl bg-stone-50 p-3"><ProductImage wine={wine} /></div>
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
-              Charakteristik & Beschreibung
-            </h4>
-            <p className="text-stone-700 text-sm leading-relaxed">
-              {wine.description}
-            </p>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Charakteristik & Beschreibung</h4>
+            <p className="text-stone-700 text-sm leading-relaxed">{wine.description || 'Beschreibung noch nicht vorhanden.'}</p>
           </div>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-stone-50 rounded-2xl p-5 border border-stone-200">
+            {[
+              ['Artikel-ID', wine.sourceId], ['Kategorie', wine.sourceCategory],
+              ['Jahrgang', wine.vintage], ['Rebsorte(n)', wine.grapeVariety],
+              ['Herkunftsland', wine.country], ['Region', wine.region], ['Geschmack', wine.flavor],
+              ['Flaschengrösse', wine.bottleSizeCl != null ? `${wine.bottleSizeCl} cl` : null],
+              ['Alkohol', wine.alcoholVol != null ? `${wine.alcoholVol}% Vol.` : wine.alcoholNote],
+              ['Restzucker', wine.residualSugarGL != null ? `${wine.residualSugarGL} g/l` : null],
+              ['Säure', wine.acidityGL != null ? `${wine.acidityGL} g/l` : null],
+              ['Gebinde', wine.packagingNote || (wine.caseSize ? `${wine.caseSize} Flaschen` : null)],
+            ].map(([label, value]) => <div key={String(label)}><dt className="text-xs font-bold text-stone-500">{label}</dt><dd className="text-stone-800 mt-1">{(value ?? '') || 'Nicht angegeben / ungeklärt'}</dd></div>)}
+          </dl>
+          {!!wine.dataIssues?.length && <div className="text-xs text-stone-600 bg-gold-50 border border-gold-200 rounded-xl p-4"><strong>Hinweise zu den Quelldaten</strong><ul className="list-disc pl-4 mt-2 space-y-1">{wine.dataIssues.map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
+          {wine.sourceUrl && <a className="text-sm text-wine-800 underline" href={wine.sourceUrl} target="_blank" rel="noreferrer">Originalprodukt bei Kaisergarten ansehen</a>}
 
-          {/* Degustationsnotizen */}
-          <div className="bg-stone-50 rounded-2xl p-4 sm:p-5 border border-stone-200/80">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-wine-900 mb-3 flex items-center gap-2">
-              <WineIcon className="w-4 h-4 text-wine-800" />
-              Degustationsnotiz der Sommeliers
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="bg-white p-3 rounded-xl border border-stone-200/70">
-                <span className="font-bold text-stone-800 block mb-1">Farbe:</span>
-                <span className="text-stone-600">{wine.tastingNotes.color}</span>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-stone-200/70">
-                <span className="font-bold text-stone-800 block mb-1">Nase (Bouquet):</span>
-                <span className="text-stone-600">{wine.tastingNotes.nose}</span>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-stone-200/70">
-                <span className="font-bold text-stone-800 block mb-1">Gaumen:</span>
-                <span className="text-stone-600">{wine.tastingNotes.palate}</span>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-stone-200/70">
-                <span className="font-bold text-stone-800 block mb-1">Abgang:</span>
-                <span className="text-stone-600">{wine.tastingNotes.finish}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Speisebegleitung & Technische Daten */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            {/* Speisen */}
-            <div className="bg-creme-50/70 p-4 rounded-2xl border border-creme-200">
-              <h5 className="font-bold text-stone-800 mb-2 flex items-center gap-1.5">
-                <Utensils className="w-3.5 h-3.5 text-stone-600" />
-                Speiseempfehlung
-              </h5>
-              <ul className="space-y-1.5 text-stone-600">
-                {wine.foodPairing.map((food, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-600 shrink-0" />
-                    <span>{food}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Servier- & Lagerdaten */}
-            <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2.5">
-              <div>
-                <span className="text-stone-500 block text-[10px] uppercase font-bold">Rebsorte(n)</span>
-                <span className="font-medium text-stone-800">{wine.grapeVariety}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-stone-500 block text-[10px] uppercase font-bold flex items-center gap-1">
-                    <Thermometer className="w-3 h-3" /> Trinktemperatur
-                  </span>
-                  <span className="font-medium text-stone-800">{wine.servingTempC}</span>
-                </div>
-                <div>
-                  <span className="text-stone-500 block text-[10px] uppercase font-bold flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Reifepotenzial
-                  </span>
-                  <span className="font-medium text-stone-800">{wine.agingPotential}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between border-t border-stone-200/80 pt-2 text-stone-600">
-                <span>Flasche: {wine.bottleSizeCl} cl</span>
-                <span>Alkohol: {wine.alcoholVol}% Vol.</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer Actions (Cart Additions) */}
         <div className="p-4 sm:p-6 bg-stone-50 border-t border-stone-200 shrink-0">
+          {!orderable && <p className="text-xs text-stone-600 mb-3">Derzeit nicht bestellbar. Preis und Gebinde müssen bestätigt sein.</p>}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold font-mono text-wine-950">
-                  {formatCHF(wine.priceCHF)}
+                  {wine.priceCHF != null ? formatCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
                 </span>
-                <span className="text-xs text-stone-500">/ Einzelflasche</span>
+                {wine.priceCHF != null && <span className="text-xs text-stone-500">/ Einzelflasche</span>}
               </div>
               {wine.casePriceCHF && (
                 <div className="text-xs text-gold-900 font-medium">
@@ -190,8 +115,9 @@ export const WineDetailModal: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                disabled={!orderable}
                 onClick={() => addItem(wine, 1)}
-                className="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-white hover:bg-stone-100 text-stone-900 border border-stone-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                className="disabled:opacity-40 disabled:cursor-not-allowed flex-1 sm:flex-none px-4 py-3 rounded-xl bg-white hover:bg-stone-100 text-stone-900 border border-stone-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>+1 Flasche</span>
@@ -199,8 +125,9 @@ export const WineDetailModal: React.FC = () => {
 
               <button
                 type="button"
+                disabled={!orderable}
                 onClick={() => addCase(wine)}
-                className="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-wine-900 hover:bg-wine-950 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
+                className="disabled:opacity-40 disabled:cursor-not-allowed flex-1 sm:flex-none px-4 py-3 rounded-xl bg-wine-900 hover:bg-wine-950 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
               >
                 <Package className="w-4 h-4 text-gold-300" />
                 <span>+6er Karton</span>
@@ -208,8 +135,9 @@ export const WineDetailModal: React.FC = () => {
 
               <button
                 type="button"
+                disabled={!orderable}
                 onClick={() => addDoubleCase(wine)}
-                className="flex-1 sm:flex-none px-4 py-3 rounded-xl bg-gold-400/30 hover:bg-gold-400/40 border border-gold-500/50 text-gold-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
+                className="disabled:opacity-40 disabled:cursor-not-allowed flex-1 sm:flex-none px-4 py-3 rounded-xl bg-gold-400/30 hover:bg-gold-400/40 border border-gold-500/50 text-gold-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
               >
                 <Package className="w-4 h-4 text-gold-800" />
                 <span>+12er (2 Kartons)</span>

@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { isOrderableWine, restoreCatalogCart } from '../utils/catalog';
+import { CATALOG } from '../data/catalog';
 import { Wine } from '../types/wine';
 import { CartItem, CartSummary } from '../types/cart';
 import { Order } from '../types/order';
@@ -46,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
+      return saved ? restoreCatalogCart(JSON.parse(saved), CATALOG) : [];
     } catch {
       return [];
     }
@@ -89,7 +91,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [items]);
 
   const addItem = (wine: Wine, count: number = 1) => {
-    if (count <= 0) return;
+    if (!isOrderableWine(wine) || !Number.isSafeInteger(count) || count <= 0) return;
     setItems((prev) => {
       const existing = prev.find((i) => i.wine.id === wine.id);
       if (existing) {

@@ -34,3 +34,4 @@ test-results/
 # Local design handover and screenshots are not publication sources
 /design/
 /docs/*.png
+/.catalog-import/

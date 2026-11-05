@@ -7,7 +7,7 @@ import { CartItem } from '../types/cart';
  * Spirituosen und Sonderprodukte (Kategorie 'special') bleiben vorerst separat.
  */
 export function isWineCartonProduct(wine: Wine): boolean {
-  return wine.category !== 'special';
+  return wine.cartonRule ? wine.cartonRule === 'standard-6' : !['special', 'spirits', 'dessert'].includes(wine.category);
 }
 
 export interface CartonValidationResult {

@@ -1,8 +1,8 @@
-import { Wine } from './wine';
+import { PricedWine } from './wine';
 import { CartonValidationResult } from '../utils/cartonRule';
 
 export interface CartItem {
-  wine: Wine;
+  wine: PricedWine;
   quantity: number; // total number of bottles
 }
 
