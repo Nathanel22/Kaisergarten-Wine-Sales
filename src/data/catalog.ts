@@ -1,4 +1,5 @@
-import { demoClassification, DEMO_UNIT_PRICE_CHF } from '../config/demoPrices';
+import { fairPrice, sourceFor } from '../config/expovina2026';
+import { demoClassification, simulationPriceCHF } from '../config/demoPrices';
 import snapshot from './products.json';
 import { Wine } from '../types/wine';
 
@@ -6,7 +7,9 @@ import { Wine } from '../types/wine';
 export const CATALOG: Wine[] = snapshot.products.map((product) => ({
   ...product,
   demoClassification: demoClassification(product.sourceId),
-  priceCHF: demoClassification(product.sourceId) === 'DEMO_STANDARD' ? DEMO_UNIT_PRICE_CHF : null,
+  priceCHF: simulationPriceCHF(product.sourceId),
+  priceSource: sourceFor(product.sourceId),
+  bottleSizeCl: fairPrice(product.sourceId)?.volumeCl ?? product.bottleSizeCl,
   category: product.category as Wine['category'],
   cartonRule: product.cartonRule as Wine['cartonRule'],
   tastingNotes: { color: '', nose: '', palate: '', finish: '' },

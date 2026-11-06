@@ -21,6 +21,7 @@ const __dirname = path.dirname(__filename);
 // In-Memory-Loader für TypeScript-Module (ohne Duplikation von Logik)
 function loadTs(relativeFilePath) {
   const fullPath = path.resolve(__dirname, relativeFilePath);
+  if (fullPath.endsWith('.json')) return {default: JSON.parse(fs.readFileSync(fullPath,'utf8'))};
   const resolved = fullPath.endsWith('.ts') ? fullPath : fullPath + '.ts';
   const code = fs.readFileSync(resolved, 'utf8');
   const { outputText } = ts.transpileModule(code, {

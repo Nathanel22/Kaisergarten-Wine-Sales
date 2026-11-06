@@ -35,3 +35,7 @@ test-results/
 /design/
 /docs/*.png
 /.catalog-import/
+
+# Originalfotos der Messeunterlagen bleiben lokal.
+/docs/preislisten/*.[jJ][pP][gG]
+/docs/preislisten/*.[jJ][pP][eE][gG]

@@ -7,7 +7,7 @@ import { loadStoredCustomers } from '../data/mockCustomers';
 import { DEMO_SELLERS, Seller } from '../config/demoSeller';
 import { getDemoFairContext } from '../config/fairContext';
 import { generateIdempotencyKey } from '../utils/orderProcessing';
-import { formatDemoCHF } from '../utils/formatters';
+import { formatSimulationTotal, formatItemPrice } from '../utils/formatters';
 import {
   X,
   User,
@@ -453,11 +453,11 @@ export const CheckoutModal: React.FC = () => {
                       <div>
                         <span className="font-semibold text-stone-900">{i.wine.name}</span>
                         <span className="text-stone-500 font-mono ml-2">
-                          {i.quantity} × {formatDemoCHF(i.wine.priceCHF)}
+                          {i.quantity} × {formatItemPrice(i.wine.priceCHF, i.wine.priceSource)}
                         </span>
                       </div>
                       <span className="font-mono font-bold text-stone-900">
-                        {formatDemoCHF(i.wine.priceCHF * i.quantity)}
+                        {formatItemPrice(i.wine.priceCHF * i.quantity, i.wine.priceSource)}
                       </span>
                     </div>
                   ))}
@@ -466,22 +466,22 @@ export const CheckoutModal: React.FC = () => {
                 <div className="bg-stone-50 p-3 border-t border-stone-200 space-y-1.5">
                   <div className="flex justify-between text-stone-600">
                     <span>Zwischensumme:</span>
-                    <span className="font-mono">{formatDemoCHF(summary.rawSubtotalCHF)}</span>
+                    <span className="font-mono">{formatSimulationTotal(summary.rawSubtotalCHF)}</span>
                   </div>
                   {summary.cartonDiscountCHF > 0 && (
                     <div className="flex justify-between text-emerald-700 font-medium">
                       <span>Messe- & Kartonvorteil (unbestätigte Annahme):</span>
-                      <span className="font-mono">-{formatDemoCHF(summary.cartonDiscountCHF)}</span>
+                      <span className="font-mono">-{formatSimulationTotal(summary.cartonDiscountCHF)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-stone-500 text-[11px]">
                     <span>Enthaltene MwSt. (8.1% CH):</span>
-                    <span className="font-mono">{formatDemoCHF(summary.mwstCHF)}</span>
+                    <span className="font-mono">{formatSimulationTotal(summary.mwstCHF)}</span>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-base font-bold text-stone-950">
                     <span className="font-serif">Gesamtbetrag (CHF):</span>
                     <span className="font-mono text-xl text-wine-950">
-                      {formatDemoCHF(summary.finalTotalCHF)}
+                      {formatSimulationTotal(summary.finalTotalCHF)}
                     </span>
                   </div>
                 </div>
@@ -547,7 +547,7 @@ export const CheckoutModal: React.FC = () => {
               ) : (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                  <span>Demo-Bestellung simulieren ({formatDemoCHF(summary.finalTotalCHF)})</span>
+                  <span>Demo-Bestellung simulieren ({formatSimulationTotal(summary.finalTotalCHF)})</span>
                 </>
               )}
             </button>

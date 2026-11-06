@@ -51,7 +51,7 @@ export function App() {
           totalResultsCount={filteredWines.length}
         />
 
-        <p className="text-sm text-stone-600 mb-5">Bestellsimulation: 56 Weine zum DEMO-PREIS von CHF 25.00 pro Flasche. Für die Simulation lassen sich Sorten zu 6er- oder 12er-Kartons mischen. Reale Preise und Gebinde sind unbestätigt.</p>
+        <p className="text-sm text-stone-600 mb-5">Expovina Zürich 2026 · Messepreise gemäss Bestellbogen, inklusive MwSt. Für freigegebene Weine ohne bestätigten Messepreis gilt der fiktive Demo-Preis von CHF 25.00. Mischkartons sind nur in der Simulation bestellbar.</p>
 
         {/* Wine Catalog Grid */}
         {filteredWines.length > 0 ? (

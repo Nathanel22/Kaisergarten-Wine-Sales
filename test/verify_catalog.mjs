@@ -25,6 +25,18 @@ assert.equal(CATALOG.length, Object.values(snapshot.pages).reduce((a, b) => a + 
 assert.equal(CATALOG.length, 67, 'Reviewed source snapshot has 67 articles; review count when refreshing');
 assert.equal(new Set(CATALOG.map(p => p.id)).size, CATALOG.length);
 assert.equal(new Set(CATALOG.map(p => p.sourceUrl)).size, CATALOG.length);
+const tariffs = loadTs('src/data/expovina2026Prices.json');
+const paper = fs.readFileSync(path.join(root,'test/fixtures/expovina2026-approved.csv'),'utf8').trim().split(/\r?\n/).slice(1).map(line => line.split(';'));
+assert.equal(paper.length,24);
+assert.equal(tariffs.length,24);
+assert.equal(new Set(tariffs.map(t => t.shopId)).size,24);
+for (const t of tariffs) {
+  const row = paper.find(r => Number(r[0]) === t.page && Number(r[1]) === t.row);
+  assert.ok(row);
+  assert.equal(row[2],t.articleNumber); assert.equal(row[3],t.shopId);
+  assert.equal(Math.round(Number(row[4])*100),t.priceRappen);
+}
+
 const categories = {};
 for (const p of CATALOG) {
   categories[p.category] = (categories[p.category] ?? 0) + 1;
@@ -33,10 +45,12 @@ for (const p of CATALOG) {
   const official = snapshot.products.find(item => item.id === p.id);
   assert.equal(official.priceCHF, null);
   assert.equal(p.caseSize, official.caseSize);
-  assert.equal(p.bottleSizeCl, official.bottleSizeCl);
-  const standard = official.cartonRule === 'unconfirmed';
+  const tariff = tariffs.find(row => row.shopId === p.sourceId);
+  assert.equal(p.bottleSizeCl, tariff?.volumeCl ?? official.bottleSizeCl);
+  const standard = official.cartonRule === 'unconfirmed' && p.sourceId !== '1093062';
   assert.equal(p.demoClassification, standard ? 'DEMO_STANDARD' : 'DEMO_SONDERPRODUKT');
-  assert.equal(p.priceCHF, standard ? 25 : null);
+  assert.equal(p.priceCHF, tariff ? tariff.priceRappen / 100 : standard ? 25 : null);
+  assert.equal(p.priceSource, tariff ? 'MESSEPREIS 2026' : 'DEMO-PREIS');
   assert.equal(isOrderableWine(p), standard);
   assert.equal(isWineCartonProduct(p), standard);
   if (p.imageUrl) {
@@ -47,7 +61,7 @@ for (const p of CATALOG) {
   }
   if (!standard) {
     const result = validateOrderParams({ items: [{ wine: p, quantity: 6 }] });
-    assert.ok(result.errors.some(message => message.startsWith('Preis noch nicht hinterlegt')));
+    assert.ok(result.errors.some(message => message.startsWith('Gebinde und Bestellfreigabe')));
   }
 }
 assert.deepEqual(categories, { white:22, red:29, rose:4, sparkling:4, dessert:4, spirits:3, special:1 });
@@ -61,8 +75,8 @@ for (const sortBy of ['price-asc','price-desc','vintage-desc','name-asc']) {
   assert.equal(filterCatalog(CATALOG, { ...baseFilter, sortBy }).length, 67);
 }
 const priced = CATALOG.find(isOrderableWine);
-const special = CATALOG.find(p => !isOrderableWine(p));
-assert.equal(CATALOG.filter(isOrderableWine).length, 56);
+const special = CATALOG.find(p => !isOrderableWine(p) && p.priceCHF == null);
+assert.equal(CATALOG.filter(isOrderableWine).length, 55);
 for (const priceCHF of [null, 0, -1, 24, NaN, Infinity]) assert.equal(isOrderableWine({ ...priced, priceCHF }), false);
 assert.equal(isOrderableWine({ ...special, priceCHF:25 }), false);
 const sortable = [special, priced, { ...priced, priceCHF:10 }];
@@ -132,6 +146,16 @@ localStorage.setItem = () => { throw new Error('quota'); };
 assert.throws(() => saveStoredCustomer(draft),/nicht gespeichert/);
 localStorage.setItem = setItem;
 assert.equal(loadStoredCustomers().length,5);
+const different = ['1093038', '1093066'].map(id => ({id:'kg-shop-'+id, quantity:3}));
+const fair = checkout(different, 'fair-mixed').order;
+assert.deepEqual(fair.items.map(i => [i.unitPriceRappen,i.priceSource]), [[2390,'MESSEPREIS 2026'],[3550,'MESSEPREIS 2026']]);
+assert.equal(fair.pricing.rawSubtotalRappen,17820);
+assert.equal(fair.pricing.finalTotalRappen,17820); // No delivery fee applied
+assert.ok(checkout(different,'fair-mixed').isDuplicate);
+const hybrid = checkout([different[0],lines[0]],'fair-demo').order;
+assert.equal(hybrid.pricing.finalTotalRappen,14670);
+assert.deepEqual(hybrid.items.map(i => i.priceSource),['MESSEPREIS 2026','DEMO-PREIS']);
+for (const id of ['1093062','1092965','1092973']) assert.throws(() => checkout([{id:'kg-shop-'+id,quantity:6}],id),/nicht freigegeben/);
 assert.equal(transmissions,0);
 for (const key of [CART_STORAGE_KEY,SELLER_STORAGE_KEY,'unrelated']) storage.set(key,'test');
 resetDemoData(localStorage);

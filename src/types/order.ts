@@ -1,7 +1,7 @@
 import { Customer } from './customer';
 
 export interface OrderItemSnapshot {
-  readonly priceSource: 'DEMO-PREIS';
+  readonly priceSource: import('../config/expovina2026').PriceSource;
   readonly wineId: string;
   readonly name: string;
   readonly vintage: number | null;

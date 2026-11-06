@@ -10,7 +10,7 @@ export function isOrderableWine(wine: Wine): wine is PricedWine {
 export function orderabilityMessage(wine: Wine): string {
   return wine.priceCHF == null || !Number.isFinite(wine.priceCHF) || wine.priceCHF <= 0
     ? 'Preis noch nicht hinterlegt'
-    : 'Gebinde und Bestellfreigabe noch nicht bestätigt';
+    : 'Nur zur Ansicht – keine Bestellfreigabe';
 }
 
 const compareNullable = (a: number | null, b: number | null, descending = false) =>

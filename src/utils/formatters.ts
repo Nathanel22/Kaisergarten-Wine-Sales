@@ -38,7 +38,11 @@ export function formatCHF(amount: number): string {
 /**
  * Formatiert ganzzahlige Rappen im Schweizer Standardformat
  */
-export const formatDemoCHF = (amount: number) => `DEMO-PREIS ${formatCHF(amount)}`;
+export function formatItemPrice(amount: number, source: import('../config/expovina2026').PriceSource = 'DEMO-PREIS') {
+  return `${source} · ${formatCHF(amount)}`;
+}
+
+export const formatSimulationTotal = (amount: number) => `Simulation · ${formatCHF(amount)}`;
 
 export function formatRappen(rappen: number): string {
   return formatCHF(rappenToCHF(rappen));

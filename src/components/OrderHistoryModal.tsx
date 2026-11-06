@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { Order } from '../types/order';
 import { loadStoredOrders } from '../utils/orderProcessing';
-import { formatDemoCHF } from '../utils/formatters';
+import { formatSimulationTotal, formatItemPrice } from '../utils/formatters';
 import { X, Search, FileText, ShieldAlert } from 'lucide-react';
 
 export const OrderHistoryModal: React.FC = () => {
@@ -116,7 +116,7 @@ export const OrderHistoryModal: React.FC = () => {
 
                       <div className="text-right shrink-0">
                         <div className="font-mono font-bold text-sm text-wine-950">
-                          {formatDemoCHF(ord.pricing.finalTotalCHF)}
+                          {formatSimulationTotal(ord.pricing.finalTotalCHF)}
                         </div>
                         <div className="text-[10px] text-stone-400 font-mono">{ord.sellerName}</div>
                       </div>
@@ -176,11 +176,11 @@ export const OrderHistoryModal: React.FC = () => {
                         <div>
                           <span className="font-semibold text-stone-900">{i.name}</span>
                           <span className="text-stone-500 font-mono ml-1.5">
-                            {i.quantity} × {formatDemoCHF(i.unitPriceCHF)}
+                            {i.quantity} × {formatItemPrice(i.unitPriceCHF, i.priceSource)}
                           </span>
                         </div>
                         <span className="font-mono font-bold text-stone-900">
-                          {formatDemoCHF(i.lineTotalCHF)}
+                          {formatItemPrice(i.lineTotalCHF, i.priceSource)}
                         </span>
                       </div>
                     ))}
@@ -188,22 +188,22 @@ export const OrderHistoryModal: React.FC = () => {
                   <div className="bg-stone-50 p-2.5 border-t border-stone-200 text-[11px] space-y-1">
                     <div className="flex justify-between text-stone-600">
                       <span>Zwischensumme:</span>
-                      <span className="font-mono">{formatDemoCHF(selectedOrder.pricing.rawSubtotalCHF)}</span>
+                      <span className="font-mono">{formatSimulationTotal(selectedOrder.pricing.rawSubtotalCHF)}</span>
                     </div>
                     {selectedOrder.pricing.cartonDiscountCHF > 0 && (
                       <div className="flex justify-between text-emerald-700 font-medium">
                         <span>Rabatte:</span>
-                        <span className="font-mono">-{formatDemoCHF(selectedOrder.pricing.cartonDiscountCHF)}</span>
+                        <span className="font-mono">-{formatSimulationTotal(selectedOrder.pricing.cartonDiscountCHF)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-stone-500 text-[10px]">
                       <span>MwSt. (8.1% CH):</span>
-                      <span className="font-mono">{formatDemoCHF(selectedOrder.pricing.mwstCHF)}</span>
+                      <span className="font-mono">{formatSimulationTotal(selectedOrder.pricing.mwstCHF)}</span>
                     </div>
                     <div className="flex justify-between items-baseline pt-1 border-t border-stone-200 font-bold text-stone-950 text-xs">
                       <span>Gesamtbetrag (CHF):</span>
                       <span className="font-mono text-sm text-wine-950">
-                        {formatDemoCHF(selectedOrder.pricing.finalTotalCHF)}
+                        {formatSimulationTotal(selectedOrder.pricing.finalTotalCHF)}
                       </span>
                     </div>
                   </div>

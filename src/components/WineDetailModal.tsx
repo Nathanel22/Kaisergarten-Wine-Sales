@@ -2,7 +2,7 @@ import { ProductImage } from './ProductImage';
 import { isOrderableWine } from '../utils/catalog';
 import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { formatDemoCHF } from '../utils/formatters';
+import { formatItemPrice } from '../utils/formatters';
 import { X, Package, Plus, Check } from 'lucide-react';
 
 export const WineDetailModal: React.FC = () => {
@@ -96,19 +96,19 @@ export const WineDetailModal: React.FC = () => {
 
         {/* Footer Actions (Cart Additions) */}
         <div className="p-4 sm:p-6 bg-stone-50 border-t border-stone-200 shrink-0">
-          {orderable && <p className="text-xs text-stone-600 mb-3">Simuliertes Kartongebinde. Tatsächliche Flaschengrösse und Lieferbedingungen sind unbestätigt.</p>}
-          {!orderable && <p className="text-xs text-stone-600 mb-3">Derzeit nicht bestellbar. Preis und Gebinde müssen bestätigt sein.</p>}
+          {orderable && <p className="text-xs text-stone-600 mb-3">Simuliertes Kartongebinde. Lieferbedingungen sind unbestätigt.</p>}
+          {!orderable && <p className="text-xs text-stone-600 mb-3">Nur zur Ansicht. Für die Kartonsimulation nicht freigegeben.</p>}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold font-mono text-wine-950">
-                  {wine.priceCHF != null ? formatDemoCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
+                  {wine.priceCHF != null ? formatItemPrice(wine.priceCHF, wine.priceSource) : 'Preis noch nicht hinterlegt'}
                 </span>
                 {wine.priceCHF != null && <span className="text-xs text-stone-500">/ Einzelflasche</span>}
               </div>
               {wine.casePriceCHF && (
                 <div className="text-xs text-gold-900 font-medium">
-                  {wine.caseSize}er Karton: <strong className="font-mono">{formatDemoCHF(wine.casePriceCHF)}</strong>
+                  {wine.caseSize}er Karton: <strong className="font-mono">{formatItemPrice(wine.casePriceCHF, wine.priceSource)}</strong>
                 </div>
               )}
             </div>

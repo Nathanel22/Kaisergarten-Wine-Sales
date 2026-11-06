@@ -1,3 +1,4 @@
+import { sourceFor } from '../config/expovina2026';
 import { isWineCartonProduct } from './cartonRule';
 import { hasDemoQuote } from '../config/demoPrices';
 import { Order, OrderItemSnapshot, OrderPricingSnapshot, CreateOrderParams, SaveOrderResult } from '../types/order';
@@ -148,7 +149,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
     rawSubtotalRappen += lineTotalRappen;
 
     itemsSnapshot.push({
-      priceSource: 'DEMO-PREIS',
+      priceSource: sourceFor(item.wine.sourceId),
       wineId: item.wine.id,
       name: item.wine.name,
       vintage: item.wine.vintage,

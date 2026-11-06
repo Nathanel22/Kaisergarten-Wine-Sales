@@ -3,7 +3,7 @@ import { isOrderableWine, orderabilityMessage } from '../utils/catalog';
 import React from 'react';
 import { Wine } from '../types/wine';
 import { useCart } from '../context/CartContext';
-import { formatDemoCHF } from '../utils/formatters';
+import { formatItemPrice } from '../utils/formatters';
 import { Info, Plus, Minus, Package, Award } from 'lucide-react';
 
 interface WineCardProps {
@@ -133,16 +133,16 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
               Preis
             </div>
             <div className="text-xl font-bold font-mono text-stone-900">
-              {wine.priceCHF != null ? formatDemoCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
+              {wine.priceCHF != null ? formatItemPrice(wine.priceCHF, wine.priceSource) : 'Preis noch nicht hinterlegt'}
             </div>
           </div>
           {wine.casePriceCHF && (
             <div className="text-right">
               <div className="text-[10px] uppercase font-semibold text-gold-800">
-                {wine.caseSize}er Karton {caseSavings > 0 && <span className="text-emerald-700 font-bold">(-{formatDemoCHF(caseSavings)})</span>}
+                {wine.caseSize}er Karton {caseSavings > 0 && <span className="text-emerald-700 font-bold">(-{formatItemPrice(caseSavings, wine.priceSource)})</span>}
               </div>
               <div className="text-sm font-bold font-mono text-stone-700">
-                {formatDemoCHF(wine.casePriceCHF)}
+                {formatItemPrice(wine.casePriceCHF, wine.priceSource)}
               </div>
             </div>
           )}

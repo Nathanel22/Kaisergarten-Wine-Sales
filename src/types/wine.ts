@@ -12,6 +12,7 @@ export interface Wine {
   appellation?: string;
   bottleSizeCl: number | null;
   alcoholVol: number | null;
+  priceSource?: import('../config/expovina2026').PriceSource;
   priceCHF: number | null; // null means unknown, never a free product
   caseSize: number | null;
   casePriceCHF: number | null;

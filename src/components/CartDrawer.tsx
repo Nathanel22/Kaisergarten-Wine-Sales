@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { formatDemoCHF, formatBottlesSummary } from '../utils/formatters';
+import { formatSimulationTotal, formatItemPrice, formatBottlesSummary } from '../utils/formatters';
 import { X, Trash2, Plus, Minus, Package, ShoppingBag, Truck, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { DEMO_TABLET_ID, getDemoFairContext } from '../config/fairContext';
 
@@ -199,10 +199,10 @@ export const CartDrawer: React.FC = () => {
                       {/* Line Item Total */}
                       <div className="text-right">
                         <div className="text-xs font-mono font-bold text-stone-900">
-                          {formatDemoCHF(lineTotal)}
+                          {formatItemPrice(lineTotal, item.wine.priceSource)}
                         </div>
                         <div className="text-[10px] text-stone-500 font-mono">
-                          {formatDemoCHF(singlePrice)} / Fl.
+                          {formatItemPrice(singlePrice, item.wine.priceSource)} / Fl.
                         </div>
                       </div>
                     </div>
@@ -232,25 +232,25 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-1.5 text-xs text-stone-600 pt-1">
                 <div className="flex justify-between">
                   <span>Zwischensumme ({summary.totalBottles} Flaschen):</span>
-                  <span className="font-mono text-stone-800">{formatDemoCHF(summary.rawSubtotalCHF)}</span>
+                  <span className="font-mono text-stone-800">{formatSimulationTotal(summary.rawSubtotalCHF)}</span>
                 </div>
 
                 {summary.cartonDiscountCHF > 0 && (
                   <div className="flex justify-between text-emerald-700 font-medium">
                     <span>Messe- & Kartonvorteil (unbestätigte Annahme):</span>
-                    <span className="font-mono">-{formatDemoCHF(summary.cartonDiscountCHF)}</span>
+                    <span className="font-mono">-{formatSimulationTotal(summary.cartonDiscountCHF)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-stone-500 text-[11px]">
                   <span>Darin enthaltene MwSt. (8.1% CH):</span>
-                  <span className="font-mono">{formatDemoCHF(summary.mwstCHF)}</span>
+                  <span className="font-mono">{formatSimulationTotal(summary.mwstCHF)}</span>
                 </div>
 
                 <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-base font-bold text-stone-950">
                   <span className="font-serif">Gesamtbetrag (CHF):</span>
                   <span className="font-mono text-xl text-wine-950">
-                    {formatDemoCHF(summary.finalTotalCHF)}
+                    {formatSimulationTotal(summary.finalTotalCHF)}
                   </span>
                 </div>
               </div>

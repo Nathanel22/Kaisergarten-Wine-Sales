@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { formatDemoCHF } from '../utils/formatters';
+import { formatSimulationTotal } from '../utils/formatters';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 
 export const TabletQuickBar: React.FC = () => {
@@ -24,7 +24,7 @@ export const TabletQuickBar: React.FC = () => {
               {summary.totalBottles} {summary.totalBottles === 1 ? 'Flasche' : 'Flaschen'} ausgewählt
             </div>
             <div className="text-base font-bold font-mono text-wine-950">
-              {formatDemoCHF(summary.finalTotalCHF)}
+              {formatSimulationTotal(summary.finalTotalCHF)}
             </div>
           </div>
         </div>

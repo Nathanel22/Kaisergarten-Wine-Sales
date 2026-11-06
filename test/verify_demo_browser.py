@@ -40,12 +40,15 @@ def main(live=False):
         assert loaded == 66, loaded
         add = page.get_by_role('button', name='+6', exact=True)
         expect(add).to_have_count(67)
-        assert sum(add.nth(i).is_enabled() for i in range(67)) == 56
-        expect(page.get_by_text('DEMO-PREIS CHF 25.00', exact=True)).to_have_count(56)
+        assert sum(add.nth(i).is_enabled() for i in range(67)) == 55
+        expect(page.get_by_text('DEMO-PREIS · CHF 25.00', exact=True)).to_have_count(33)
+        expect(page.get_by_text(re.compile(r'^MESSEPREIS 2026 · CHF \d+\.\d{2}$'))).to_have_count(24)
         page.get_by_role('button', name='Details', exact=True).first.click()
         expect(page.get_by_text('Simuliertes Kartongebinde.', exact=False)).to_be_visible()
         page.keyboard.press('Escape')
-        add.nth(0).click()
+        names = cards.all_text_contents()
+        add.nth(names.index('Kaiser Amaranto Rouge')).click()
+        add.nth(names.index('Turul Reserve Sauvignon Blanc black label')).click()
         page.get_by_role('button', name='Warenkorb prüfen').click()
         page.get_by_role('button', name='Bestellsimulation starten').click()
         page.get_by_role('button', name='+ Neuen Kunden erfassen').click()
@@ -58,7 +61,7 @@ def main(live=False):
         expect(page.get_by_text('Zuständiger Sommelier / Verkäufer', exact=True)).to_be_visible()
         page.get_by_text('Demo-Verkäufer 2', exact=True).click()
         page.get_by_role('button', name='Weiter', exact=True).click()
-        submit = page.get_by_role('button', name=re.compile('Demo-Bestellung simulieren.*150.00'))
+        submit = page.get_by_role('button', name=re.compile('Demo-Bestellung simulieren.*356.40'))
         expect(submit).to_be_enabled()
         # Force the actual order write to fail once, leaving the cart intact for retry.
         page.evaluate('''() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function(k,v) {
@@ -75,7 +78,7 @@ def main(live=False):
         expect(page.get_by_role('heading',name='Demo-Bestellung simuliert!')).to_be_visible()
         assert all(method == 'GET' and kind == 'image' and url.startswith(base) for method,kind,url in attempted), attempted
         orders = page.evaluate("JSON.parse(localStorage.getItem('kaisergarten_demo_orders_v1'))")
-        assert len(orders)==1 and orders[0]['mode']=='SIMULATION' and orders[0]['pricing']['finalTotalCHF']==150
+        assert len(orders)==1 and orders[0]['mode']=='SIMULATION' and orders[0]['pricing']['finalTotalCHF']==356.40
         assert orders[0]['sellerId']=='seller-02' and orders[0]['customer']['id'].startswith('DEMO-NEU-') and orders[0]['customer']['company']=='Fiktiver QA-Testbetrieb'
         page.get_by_role('button', name='Bestellübersicht öffnen').click()
         expect(page.get_by_text(orders[0]['id'],exact=True).first).to_be_visible()
@@ -94,7 +97,7 @@ def main(live=False):
         assert page.evaluate("localStorage.getItem('kaisergarten_demo_orders_v1')") is None
         assert page.evaluate("localStorage.getItem('kaisergarten_demo_customers_v1')") is None
         assert not errors,errors
-        print('Tablet browser passed: 67 products, 56 enabled, details, 6 bottles, new customer, automatic seller step, customer reselection, failed save and successful retry, history, no order transmissions, reset.')
+        print('Tablet browser passed: 67 products, 55 enabled, details, 12 mixed bottles, new customer, automatic seller step, customer reselection, failed save and successful retry, history, no order transmissions, reset.')
         browser.close()
 
 if __name__ == '__main__':
