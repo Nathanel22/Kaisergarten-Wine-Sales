@@ -18,7 +18,7 @@ import { Wine as WineIcon, Search } from 'lucide-react';
 export function App() {
   const [resetError, setResetError] = useState('');
   function resetSimulation() {
-    if (!window.confirm('Lokale Demo-Bestellungen, Warenkorb und Verkäuferauswahl auf diesem Gerät zurücksetzen?')) return;
+    if (!window.confirm('Lokal erfasste Demokunden, Demo-Bestellungen, Warenkorb und Verkäuferauswahl auf diesem Gerät zurücksetzen?')) return;
     try {
       resetDemoData(localStorage);
       window.location.reload();

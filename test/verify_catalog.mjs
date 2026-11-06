@@ -117,10 +117,26 @@ localStorage.setItem = setItem;
 assert.equal(checkout(lines,'retry').isDuplicate,false);
 assert.equal(checkout(lines,'retry').isDuplicate,true);
 assert.equal(JSON.parse(storage.get(ORDERS_STORAGE_KEY)).length,3);
+const { saveStoredCustomer, loadStoredCustomers } = loadTs('src/data/mockCustomers.ts');
+const draft = {kind:'Privatperson', firstName:'Demo', lastName:'Testperson', company:'', street:'Testgasse', houseNumber:'4b', zip:'8000', city:'Testort', country:'Schweiz', email:'kunde@example.invalid', phone:'', fictional:true};
+for (const patch of [{firstName:''},{lastName:''},{street:''},{houseNumber:''},{zip:'ABC'},{city:''},{email:''},{email:'demo@localhost'},{phone:'123456789'},{fictional:false}]) {
+  assert.throws(() => saveStoredCustomer({...draft,...patch}));
+}
+const person = saveStoredCustomer(draft);
+const firm = saveStoredCustomer({...draft,kind:'Firma',company:'Testbetrieb',firstName:'',lastName:'',email:'',phone:'00000000',country:'Deutschland',zip:'12345'});
+assert.notEqual(firm.id,person.id);
+assert.equal(loadStoredCustomers().length,5);
+assert.equal(simulateCheckout(lines,person.id,DEMO_SELLERS[0].id,'new-person').order.customer.street,'Testgasse 4b');
+assert.equal(simulateCheckout(lines,firm.id,DEMO_SELLERS[0].id,'new-company').order.customer.company,'Testbetrieb');
+localStorage.setItem = () => { throw new Error('quota'); };
+assert.throws(() => saveStoredCustomer(draft),/nicht gespeichert/);
+localStorage.setItem = setItem;
+assert.equal(loadStoredCustomers().length,5);
 assert.equal(transmissions,0);
 for (const key of [CART_STORAGE_KEY,SELLER_STORAGE_KEY,'unrelated']) storage.set(key,'test');
 resetDemoData(localStorage);
 assert.deepEqual([...storage.keys()],['unrelated']);
+assert.equal(loadStoredCustomers().length,3);
 assert.match(fs.readFileSync(path.join(root,'index.html'),'utf8'), /name="robots" content="noindex, nofollow"/);
 assert.match(fs.readFileSync(path.join(root,'public/robots.txt'),'utf8'), /Disallow: \/\s*$/);
 console.log('Demo simulation passed: mixed 6/12, exact prices, eligible IDs, synthetic customers, zero checkout transmissions, verified retry and scoped reset.');

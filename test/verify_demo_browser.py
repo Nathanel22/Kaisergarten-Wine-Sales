@@ -46,14 +46,19 @@ def main(live=False):
         expect(page.get_by_text('Simuliertes Kartongebinde.', exact=False)).to_be_visible()
         page.keyboard.press('Escape')
         add.nth(0).click()
-        add.nth(1).click()
         page.get_by_role('button', name='Warenkorb prüfen').click()
         page.get_by_role('button', name='Bestellsimulation starten').click()
-        page.get_by_text('Firma Demo Beispielkunde 1', exact=True).click()
-        page.get_by_role('button', name='Weiter', exact=True).click()
+        page.get_by_role('button', name='+ Neuen Kunden erfassen').click()
+        page.get_by_label('Kundentyp').select_option('Firma')
+        for label,value in [('Firmenname','Fiktiver QA-Testbetrieb'),('Strasse','Testgasse'),('Hausnummer','4b'),('PLZ','8000'),('Ort','Demo-Ort'),('E-Mail-Adresse','qa@example.invalid')]:
+            field_label = label if label == 'E-Mail-Adresse' else f'{label} *'
+            page.locator('form').get_by_label(field_label, exact=True).fill(value)
+        page.get_by_role('checkbox').check()
+        page.get_by_role('button',name='Speichern und Verkäufer wählen').click()
+        expect(page.get_by_text('Zuständiger Sommelier / Verkäufer', exact=True)).to_be_visible()
         page.get_by_text('Demo-Verkäufer 2', exact=True).click()
         page.get_by_role('button', name='Weiter', exact=True).click()
-        submit = page.get_by_role('button', name=re.compile('Demo-Bestellung simulieren.*300.00'))
+        submit = page.get_by_role('button', name=re.compile('Demo-Bestellung simulieren.*150.00'))
         expect(submit).to_be_enabled()
         # Force the actual order write to fail once, leaving the cart intact for retry.
         page.evaluate('''() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function(k,v) {
@@ -70,17 +75,26 @@ def main(live=False):
         expect(page.get_by_role('heading',name='Demo-Bestellung simuliert!')).to_be_visible()
         assert all(method == 'GET' and kind == 'image' and url.startswith(base) for method,kind,url in attempted), attempted
         orders = page.evaluate("JSON.parse(localStorage.getItem('kaisergarten_demo_orders_v1'))")
-        assert len(orders)==1 and orders[0]['mode']=='SIMULATION' and orders[0]['pricing']['finalTotalCHF']==300
-        assert orders[0]['sellerId']=='seller-02' and orders[0]['customer']['id']=='DEMO-CUSTOMER-1'
+        assert len(orders)==1 and orders[0]['mode']=='SIMULATION' and orders[0]['pricing']['finalTotalCHF']==150
+        assert orders[0]['sellerId']=='seller-02' and orders[0]['customer']['id'].startswith('DEMO-NEU-') and orders[0]['customer']['company']=='Fiktiver QA-Testbetrieb'
         page.get_by_role('button', name='Bestellübersicht öffnen').click()
         expect(page.get_by_text(orders[0]['id'],exact=True).first).to_be_visible()
         page.get_by_text('Schliessen',exact=True).click()
+        page.reload()
+        add.first.click()
+        page.get_by_role('button',name='Warenkorb prüfen').click()
+        page.get_by_role('button',name='Bestellsimulation starten').click()
+        page.get_by_placeholder('Name, Ort, E-Mail, Telefon oder Kundennummer suchen...').fill(orders[0]['customer']['id'])
+        page.get_by_text(orders[0]['customer']['id'],exact=True).click()
+        expect(page.get_by_text('Ausgewählt',exact=True)).to_be_visible()
+        page.get_by_role('button',name='Schliessen',exact=True).click()
         page.once('dialog',lambda dialog: dialog.accept())
         page.get_by_role('button',name='Demo-Daten zurücksetzen').click()
         expect(cards).to_have_count(67)
         assert page.evaluate("localStorage.getItem('kaisergarten_demo_orders_v1')") is None
+        assert page.evaluate("localStorage.getItem('kaisergarten_demo_customers_v1')") is None
         assert not errors,errors
-        print('Tablet browser passed: 67 products, 56 enabled, details, mixed 12, customer/seller, failed save and successful retry, history, no order transmissions, reset.')
+        print('Tablet browser passed: 67 products, 56 enabled, details, 6 bottles, new customer, automatic seller step, customer reselection, failed save and successful retry, history, no order transmissions, reset.')
         browser.close()
 
 if __name__ == '__main__':

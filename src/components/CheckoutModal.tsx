@@ -1,3 +1,4 @@
+import { DemoCustomerForm } from './DemoCustomerForm';
 import { simulateCheckout } from '../utils/demoCheckout';
 import React, { useState, useRef } from 'react';
 import { useCart } from '../context/CartContext';
@@ -38,7 +39,8 @@ export const CheckoutModal: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Kunden-State
-  const [customers] = useState<Customer[]>(() => loadStoredCustomers());
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
+  const [customers, setCustomers] = useState<Customer[]>(() => loadStoredCustomers());
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
@@ -251,6 +253,15 @@ export const CheckoutModal: React.FC = () => {
                     />
                   </div>
 
+                  {creatingCustomer ? <DemoCustomerForm onCancel={() => setCreatingCustomer(false)} onSave={customer => {
+                    setCustomers(loadStoredCustomers());
+                    setSelectedCustomer(customer);
+                    setCreatingCustomer(false);
+                    setSearchQuery('');
+                    setSubmitError(null);
+                    setStep(2);
+                  }} /> : <button type="button" onClick={() => setCreatingCustomer(true)}
+                    className="min-h-11 w-full rounded-xl bg-wine-900 px-4 py-2 text-white font-semibold">+ Neuen Kunden erfassen</button>}
                   {/* Kundenliste */}
                   <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
                     {filteredCustomers.length === 0 ? (
@@ -258,7 +269,7 @@ export const CheckoutModal: React.FC = () => {
                         <User className="w-8 h-8 text-stone-400 mx-auto mb-2" />
                         <p className="font-semibold text-stone-700">Kein Kunde gefunden</p>
                         <p className="mt-1">
-                          Erfassen Sie den Kunden einfach als Neukunden über den Reiter oben.
+                          Über „+ Neuen Kunden erfassen“ können Sie einen Demokunden anlegen.
                         </p>
                       </div>
                     ) : (

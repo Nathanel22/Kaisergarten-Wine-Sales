@@ -1,4 +1,4 @@
-export type Salutation = 'Herr' | 'Frau' | 'Familie' | 'Firma';
+export type Salutation = 'Herr' | 'Frau' | 'Familie' | 'Firma' | 'Privatperson';
 
 export interface Customer {
   readonly id: string;
@@ -48,7 +48,7 @@ export function validateCustomerData(data: Partial<Customer>): CustomerValidatio
   const zipTrimmed = data.zip?.trim() ?? '';
   if (!zipTrimmed) {
     errors.zip = 'PLZ ist erforderlich';
-  } else if (!/^[1-9]\d{3}$/.test(zipTrimmed)) {
+  } else if (/^(schweiz|suisse|svizzera|ch|switzerland)$/i.test(data.country?.trim() || 'Schweiz') && !/^[1-9]\d{3}$/.test(zipTrimmed)) {
     errors.zip = 'Schweizer PLZ muss aus 4 Ziffern bestehen (z.B. 8001)';
   }
 
