@@ -26,10 +26,15 @@ assert.equal(CATALOG.length, 67, 'Reviewed source snapshot has 67 articles; revi
 assert.equal(new Set(CATALOG.map(p => p.id)).size, CATALOG.length);
 assert.equal(new Set(CATALOG.map(p => p.sourceUrl)).size, CATALOG.length);
 const tariffs = loadTs('src/data/expovina2026Prices.json');
-const paper = fs.readFileSync(path.join(root,'test/fixtures/expovina2026-approved.csv'),'utf8').trim().split(/\r?\n/).slice(1).map(line => line.split(';'));
-assert.equal(paper.length,24);
-assert.equal(tariffs.length,24);
-assert.equal(new Set(tariffs.map(t => t.shopId)).size,24);
+const readPriceFixture = name => fs.readFileSync(path.join(root,'test/fixtures',name),'utf8')
+  .trim().split(/\r?\n/).slice(1).map(line => line.split(';'));
+const approved = readPriceFixture('expovina2026-approved.csv');
+const proposed = readPriceFixture('expovina2026-proposed.csv');
+const paper = [...approved,...proposed];
+assert.equal(approved.length,24);
+assert.equal(proposed.length,12);
+assert.equal(tariffs.length,36);
+assert.equal(new Set(tariffs.map(t => t.shopId)).size,36);
 for (const t of tariffs) {
   const row = paper.find(r => Number(r[0]) === t.page && Number(r[1]) === t.row);
   assert.ok(row);
@@ -45,6 +50,7 @@ for (const p of CATALOG) {
   const official = snapshot.products.find(item => item.id === p.id);
   assert.equal(official.priceCHF, null);
   assert.equal(p.caseSize, official.caseSize);
+  assert.equal(p.vintage, official.vintage);
   const tariff = tariffs.find(row => row.shopId === p.sourceId);
   assert.equal(p.bottleSizeCl, tariff?.volumeCl ?? official.bottleSizeCl);
   const standard = official.cartonRule === 'unconfirmed' && p.sourceId !== '1093062';
