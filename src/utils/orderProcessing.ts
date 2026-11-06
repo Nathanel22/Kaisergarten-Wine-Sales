@@ -1,8 +1,10 @@
+import { isWineCartonProduct } from './cartonRule';
+import { hasDemoQuote } from '../config/demoPrices';
 import { Order, OrderItemSnapshot, OrderPricingSnapshot, CreateOrderParams, SaveOrderResult } from '../types/order';
 import { validateCustomerData } from '../types/customer';
 import { chfToRappen, rappenToCHF, roundRappen5 } from './formatters';
 
-const ORDERS_STORAGE_KEY = 'kaisergarten_demo_orders_v1';
+import { ORDERS_STORAGE_KEY } from './demoStorage';
 
 export interface OrderValidationResult {
   readonly isValid: boolean;
@@ -37,14 +39,14 @@ export function validateOrderParams(params: CreateOrderParams): OrderValidationR
     if (typeof item.wine.priceCHF !== 'number' || !Number.isFinite(item.wine.priceCHF) || item.wine.priceCHF <= 0) {
       errors.push(`Preis noch nicht hinterlegt: ${item.wine.name}`);
     }
-    if (item.wine.sourceId && (item.wine.cartonRule !== 'standard-6' || item.wine.caseSize !== 6)) {
+    if (item.wine.sourceId && !hasDemoQuote(item.wine)) {
       errors.push(`Gebinde und Bestellfreigabe noch nicht bestätigt: ${item.wine.name}`);
     }
 
     if (!Number.isSafeInteger(item.quantity) || item.quantity <= 0) {
       errors.push(`Ungültige Menge für Produkt "${item.wine.name}": ${item.quantity}`);
     }
-    if (item.wine.cartonRule ? item.wine.cartonRule === 'standard-6' : !['special', 'spirits', 'dessert'].includes(item.wine.category)) {
+    if (isWineCartonProduct(item.wine)) {
       totalWineBottles += item.quantity;
     }
   }
@@ -137,7 +139,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
 
   for (const item of params.items) {
     totalBottles += item.quantity;
-    if (item.wine.cartonRule ? item.wine.cartonRule === 'standard-6' : !['special', 'spirits', 'dessert'].includes(item.wine.category)) {
+    if (isWineCartonProduct(item.wine)) {
       totalWineBottles += item.quantity;
     }
 
@@ -146,6 +148,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
     rawSubtotalRappen += lineTotalRappen;
 
     itemsSnapshot.push({
+      priceSource: 'DEMO-PREIS',
       wineId: item.wine.id,
       name: item.wine.name,
       vintage: item.wine.vintage,
@@ -172,7 +175,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
   // Demo-Messebonus ab 12 Flaschen (5% unbestätigte Annahme)
   let messeBonusRappen = 0;
   const subtotalAfterCases = rawSubtotalRappen - cartonDiscountRappen;
-  if (totalBottles >= 12) {
+  if (totalBottles >= 12 && params.items.every(i => !i.wine.sourceId)) {
     messeBonusRappen = Math.round(subtotalAfterCases * 0.05);
   }
 
@@ -207,6 +210,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
   const orderId = customId || generateOrderId(customDate, idempotencyKey);
 
   return {
+    mode: 'SIMULATION',
     id: orderId,
     idempotencyKey,
     createdAt: customDate.toISOString(),
@@ -234,7 +238,7 @@ export function buildOrder(params: CreateOrderParams, customId?: string, customD
  */
 export function isOrderPayloadEqual(a: Order, b: Order): boolean {
   const payload = (order: Order) => ({
-    fairId: order.fairId, fairName: order.fairName, booth: order.booth,
+    mode: order.mode, fairId: order.fairId, fairName: order.fairName, booth: order.booth,
     tabletId: order.tabletId, sellerId: order.sellerId, sellerName: order.sellerName,
     sellerRole: order.sellerRole, customer: order.customer, items: order.items,
     pricing: order.pricing, notes: order.notes,

@@ -1,12 +1,14 @@
+import { hasDemoQuote } from '../config/demoPrices';
 import { Wine } from '../types/wine';
 import { CartItem } from '../types/cart';
 
 /**
  * Prüft, ob ein Produkt der verbindlichen 6er-Weinkartonregel unterliegt.
- * Standard-Weine (Rot, Weiss, Rosé, Schaumwein, 75 cl) unterliegen der Regel.
+ * Shopartikel zählen allein nach der freigegebenen Simulationsliste, unabhängig vom realen Volumen.
  * Spirituosen und Sonderprodukte (Kategorie 'special') bleiben vorerst separat.
  */
-export function isWineCartonProduct(wine: Wine): boolean {
+export function isWineCartonProduct(wine: Pick<Wine, 'id' | 'sourceId' | 'priceCHF' | 'cartonRule'> & {category: string}): boolean {
+  if (wine.sourceId) return hasDemoQuote(wine);
   return wine.cartonRule ? wine.cartonRule === 'standard-6' : !['special', 'spirits', 'dessert'].includes(wine.category);
 }
 
@@ -49,7 +51,7 @@ export function validateCartonRule(items: readonly CartItem[]): CartonValidation
 
   if (totalWineBottles === 0) {
     statusMessage = 'Noch keine Weine im Warenkorb';
-    detailedExplanation = 'Wählen Sie mindestens 6 Weinflaschen aus. Wein wird ausschliesslich in vollständigen 6er- oder 12er-Kartons geliefert.';
+    detailedExplanation = 'Wählen Sie mindestens 6 Weinflaschen aus. Für die Simulation zählt jede Gruppe von sechs Flaschen als vollständiger Karton.';
   } else if (isValid) {
     statusMessage = `${completeCases} vollständige${completeCases === 1 ? 'r' : ''} 6er-Karton${completeCases === 1 ? '' : 's'} (${totalWineBottles} Flaschen)`;
     detailedExplanation = completeCases >= 2

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { formatCHF } from '../utils/formatters';
+import { formatDemoCHF } from '../utils/formatters';
 import { CheckCircle2, PackageCheck, ShoppingBag, History, X } from 'lucide-react';
 
 export const OrderSuccessModal: React.FC = () => {
@@ -97,11 +97,11 @@ export const OrderSuccessModal: React.FC = () => {
                   <div>
                     <span className="font-semibold text-stone-900">{i.name}</span>
                     <span className="text-stone-500 font-mono ml-2">
-                      {i.quantity} × {formatCHF(i.unitPriceCHF)}
+                      {i.quantity} × {formatDemoCHF(i.unitPriceCHF)}
                     </span>
                   </div>
                   <span className="font-mono font-bold text-stone-900">
-                    {formatCHF(i.lineTotalCHF)}
+                    {formatDemoCHF(i.lineTotalCHF)}
                   </span>
                 </div>
               ))}
@@ -112,17 +112,17 @@ export const OrderSuccessModal: React.FC = () => {
               {order.pricing.cartonDiscountCHF > 0 && (
                 <div className="flex justify-between text-emerald-700 font-medium">
                   <span>Messevorteil & Kartonrabatt:</span>
-                  <span className="font-mono">-{formatCHF(order.pricing.cartonDiscountCHF)}</span>
+                  <span className="font-mono">-{formatDemoCHF(order.pricing.cartonDiscountCHF)}</span>
                 </div>
               )}
               <div className="flex justify-between text-stone-500 text-[11px]">
                 <span>Enthaltene MwSt. (8.1% CH):</span>
-                <span className="font-mono">{formatCHF(order.pricing.mwstCHF)}</span>
+                <span className="font-mono">{formatDemoCHF(order.pricing.mwstCHF)}</span>
               </div>
               <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-base font-bold text-stone-950">
                 <span className="font-serif">Gesamtbetrag (CHF):</span>
                 <span className="font-mono text-xl text-wine-950">
-                  {formatCHF(order.pricing.finalTotalCHF)}
+                  {formatDemoCHF(order.pricing.finalTotalCHF)}
                 </span>
               </div>
             </div>
@@ -132,7 +132,7 @@ export const OrderSuccessModal: React.FC = () => {
           <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 flex items-center gap-2">
             <PackageCheck className="w-5 h-5 text-emerald-700 shrink-0" />
             <span>
-              <strong>Versandbereit:</strong> Die Weine werden transportsicher in vollständigen 6er-Kartons verpackt und geliefert.
+              <strong>Simulation:</strong> Die Demo-Kartons wurden lokal erfasst.
             </span>
           </div>
         </div>

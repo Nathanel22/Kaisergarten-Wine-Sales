@@ -1,5 +1,7 @@
 # Kaisergarten – Produktkatalog
 
+**Lokaler Branch `demo-order-mode`:** Die Angaben unten beschreiben den ursprünglichen Katalogimport. Für die aktuelle Simulation gelten die Preis- und Bestellregeln im [Testbericht Demo-Bestellmodus](DEMO-BESTELLMODUS-TESTBERICHT.md). Die offiziellen Stammdaten und ihre dort dokumentierten Lücken gelten weiterhin.
+
 Stand der Quelldaten und Abschlussprüfung: 06.11.2026. Nur lokale Integration; kein Push und kein Deployment.
 
 ## Umfang und Herkunft

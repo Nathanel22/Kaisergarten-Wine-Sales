@@ -1,6 +1,7 @@
 import { Customer } from './customer';
 
 export interface OrderItemSnapshot {
+  readonly priceSource: 'DEMO-PREIS';
   readonly wineId: string;
   readonly name: string;
   readonly vintage: number | null;
@@ -30,6 +31,7 @@ export interface OrderPricingSnapshot {
 }
 
 export interface Order {
+  readonly mode: 'SIMULATION';
   readonly id: string; // e.g. "KG-20261105-8492"
   /** Eindeutige Kennung des Checkout-Vorgangs zur Verhinderung von doppelten Bestellungen */
   readonly idempotencyKey: string;

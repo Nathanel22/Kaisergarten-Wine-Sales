@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { Order } from '../types/order';
 import { loadStoredOrders } from '../utils/orderProcessing';
-import { formatCHF } from '../utils/formatters';
+import { formatDemoCHF } from '../utils/formatters';
 import { X, Search, FileText, ShieldAlert } from 'lucide-react';
 
 export const OrderHistoryModal: React.FC = () => {
@@ -40,7 +40,7 @@ export const OrderHistoryModal: React.FC = () => {
         <div className="bg-wine-950 text-white p-5 sm:p-6 border-b border-wine-900 flex items-center justify-between shrink-0">
           <div>
             <span className="text-[10px] font-mono uppercase tracking-widest text-gold-300">
-              Tablet POS · Erfasste Bestellungen
+              Simulation · Lokal gespeicherte Demo-Bestellungen
             </span>
             <h2 className="font-serif text-2xl font-bold text-white">Demo-Bestellübersicht</h2>
           </div>
@@ -116,7 +116,7 @@ export const OrderHistoryModal: React.FC = () => {
 
                       <div className="text-right shrink-0">
                         <div className="font-mono font-bold text-sm text-wine-950">
-                          {formatCHF(ord.pricing.finalTotalCHF)}
+                          {formatDemoCHF(ord.pricing.finalTotalCHF)}
                         </div>
                         <div className="text-[10px] text-stone-400 font-mono">{ord.sellerName}</div>
                       </div>
@@ -176,11 +176,11 @@ export const OrderHistoryModal: React.FC = () => {
                         <div>
                           <span className="font-semibold text-stone-900">{i.name}</span>
                           <span className="text-stone-500 font-mono ml-1.5">
-                            {i.quantity} × {formatCHF(i.unitPriceCHF)}
+                            {i.quantity} × {formatDemoCHF(i.unitPriceCHF)}
                           </span>
                         </div>
                         <span className="font-mono font-bold text-stone-900">
-                          {formatCHF(i.lineTotalCHF)}
+                          {formatDemoCHF(i.lineTotalCHF)}
                         </span>
                       </div>
                     ))}
@@ -188,22 +188,22 @@ export const OrderHistoryModal: React.FC = () => {
                   <div className="bg-stone-50 p-2.5 border-t border-stone-200 text-[11px] space-y-1">
                     <div className="flex justify-between text-stone-600">
                       <span>Zwischensumme:</span>
-                      <span className="font-mono">{formatCHF(selectedOrder.pricing.rawSubtotalCHF)}</span>
+                      <span className="font-mono">{formatDemoCHF(selectedOrder.pricing.rawSubtotalCHF)}</span>
                     </div>
                     {selectedOrder.pricing.cartonDiscountCHF > 0 && (
                       <div className="flex justify-between text-emerald-700 font-medium">
                         <span>Rabatte:</span>
-                        <span className="font-mono">-{formatCHF(selectedOrder.pricing.cartonDiscountCHF)}</span>
+                        <span className="font-mono">-{formatDemoCHF(selectedOrder.pricing.cartonDiscountCHF)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-stone-500 text-[10px]">
                       <span>MwSt. (8.1% CH):</span>
-                      <span className="font-mono">{formatCHF(selectedOrder.pricing.mwstCHF)}</span>
+                      <span className="font-mono">{formatDemoCHF(selectedOrder.pricing.mwstCHF)}</span>
                     </div>
                     <div className="flex justify-between items-baseline pt-1 border-t border-stone-200 font-bold text-stone-950 text-xs">
                       <span>Gesamtbetrag (CHF):</span>
                       <span className="font-mono text-sm text-wine-950">
-                        {formatCHF(selectedOrder.pricing.finalTotalCHF)}
+                        {formatDemoCHF(selectedOrder.pricing.finalTotalCHF)}
                       </span>
                     </div>
                   </div>

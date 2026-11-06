@@ -38,6 +38,8 @@ export function formatCHF(amount: number): string {
 /**
  * Formatiert ganzzahlige Rappen im Schweizer Standardformat
  */
+export const formatDemoCHF = (amount: number) => `DEMO-PREIS ${formatCHF(amount)}`;
+
 export function formatRappen(rappen: number): string {
   return formatCHF(rappenToCHF(rappen));
 }

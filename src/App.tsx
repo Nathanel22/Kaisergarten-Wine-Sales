@@ -1,3 +1,4 @@
+import { resetDemoData } from './utils/demoStorage';
 import { useState, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroBanner } from './components/HeroBanner';
@@ -15,6 +16,16 @@ import { WineFilterState } from './types/wine';
 import { Wine as WineIcon, Search } from 'lucide-react';
 
 export function App() {
+  const [resetError, setResetError] = useState('');
+  function resetSimulation() {
+    if (!window.confirm('Lokale Demo-Bestellungen, Warenkorb und Verkäuferauswahl auf diesem Gerät zurücksetzen?')) return;
+    try {
+      resetDemoData(localStorage);
+      window.location.reload();
+    } catch {
+      setResetError('Zurücksetzen unvollständig. Bitte den lokalen Speicher prüfen und erneut versuchen.');
+    }
+  }
   const [filter, setFilter] = useState<WineFilterState>({
     category: 'all',
     searchQuery: '',
@@ -40,7 +51,7 @@ export function App() {
           totalResultsCount={filteredWines.length}
         />
 
-        <p className="text-sm text-stone-600 mb-5">Offizieller Produktkatalog · Preise und Gebinde werden noch bestätigt. Derzeit sind keine Artikel bestellbar.</p>
+        <p className="text-sm text-stone-600 mb-5">Bestellsimulation: 56 Weine zum DEMO-PREIS von CHF 25.00 pro Flasche. Für die Simulation lassen sich Sorten zu 6er- oder 12er-Kartons mischen. Reale Preise und Gebinde sind unbestätigt.</p>
 
         {/* Wine Catalog Grid */}
         {filteredWines.length > 0 ? (
@@ -83,6 +94,8 @@ export function App() {
           <div className="text-stone-400 text-[11px]">
             &copy; 2026 Kaisergarten Weine. Alle Rechte vorbehalten.
           </div>
+          <button type="button" onClick={resetSimulation} className="underline text-wine-900 py-2">Demo-Daten zurücksetzen</button>
+          {resetError && <p role="alert">{resetError}</p>}
         </div>
       </footer>
 

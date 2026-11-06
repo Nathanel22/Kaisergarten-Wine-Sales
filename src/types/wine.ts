@@ -2,6 +2,7 @@ export type WineCategory = 'all' | 'red' | 'white' | 'rose' | 'sparkling' | 'des
 
 export interface Wine {
   id: string;
+  demoClassification?: import('../config/demoPrices').DemoClassification;
   name: string;
   subTitle?: string;
   category: Exclude<WineCategory, 'all'>;

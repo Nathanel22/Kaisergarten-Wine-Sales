@@ -1,15 +1,15 @@
+import { simulateCheckout } from '../utils/demoCheckout';
 import React, { useState, useRef } from 'react';
 import { useCart } from '../context/CartContext';
-import { Customer, Salutation, validateCustomerData } from '../types/customer';
-import { loadStoredCustomers, saveStoredCustomer } from '../data/mockCustomers';
+import { Customer } from '../types/customer';
+import { loadStoredCustomers } from '../data/mockCustomers';
 import { DEMO_SELLERS, Seller } from '../config/demoSeller';
 import { getDemoFairContext } from '../config/fairContext';
-import { buildOrder, saveStoredOrder, generateIdempotencyKey } from '../utils/orderProcessing';
-import { formatCHF } from '../utils/formatters';
+import { generateIdempotencyKey } from '../utils/orderProcessing';
+import { formatDemoCHF } from '../utils/formatters';
 import {
   X,
   User,
-  UserPlus,
   Search,
   CheckCircle2,
   AlertTriangle,
@@ -38,33 +38,12 @@ export const CheckoutModal: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Kunden-State
-  const [customers, setCustomers] = useState<Customer[]>(() => loadStoredCustomers());
-  const [customerMode, setCustomerMode] = useState<'search' | 'create'>('search');
+  const [customers] = useState<Customer[]>(() => loadStoredCustomers());
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
-  // Neukunden-Formular State
-  const [formData, setFormData] = useState<Partial<Customer>>({
-    salutation: 'Herr',
-    firstName: '',
-    lastName: '',
-    company: '',
-    street: '',
-    zip: '',
-    city: '',
-    canton: 'ZH',
-    country: 'Schweiz',
-    email: '',
-    phone: '',
-    notes: '',
-  });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  // Verkäufer-State für Bestellung
-  const [chosenSeller, setChosenSeller] = useState<Seller>(activeSeller);
-
-  // Notiz zur Bestellung
-  const [orderNotes, setOrderNotes] = useState('');
+  const [sellerSelection, setChosenSeller] = useState<Seller | null>(null);
+  const chosenSeller = sellerSelection ?? activeSeller;
 
   // Idempotenz / Doppelklick-Schutz
   const [checkoutSessionKey, setCheckoutSessionKey] = useState<string>(() => generateIdempotencyKey());
@@ -93,39 +72,6 @@ export const CheckoutModal: React.FC = () => {
     setSelectedCustomer(customer);
   };
 
-  const handleCreateCustomerSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const validation = validateCustomerData(formData);
-    if (!validation.isValid) {
-      setFormErrors(validation.errors);
-      return;
-    }
-
-    const newId = `KND-${Math.floor(2000 + Math.random() * 8000)}`;
-    const newCustomer: Customer = {
-      id: newId,
-      salutation: formData.salutation as Salutation,
-      firstName: formData.firstName?.trim() || '',
-      lastName: formData.lastName?.trim() || '',
-      company: formData.company?.trim(),
-      street: formData.street?.trim() || '',
-      zip: formData.zip?.trim() || '',
-      city: formData.city?.trim() || '',
-      canton: formData.canton?.trim(),
-      country: 'Schweiz',
-      email: formData.email?.trim() || '',
-      phone: formData.phone?.trim() || '',
-      notes: formData.notes?.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    const updated = saveStoredCustomer(newCustomer);
-    setCustomers(updated);
-    setSelectedCustomer(newCustomer);
-    setCustomerMode('search');
-    setFormErrors({});
-  };
-
   const handleCompleteOrder = async () => {
     if (submissionLock.current) return; // Synchronous guard before React updates
     if (!selectedCustomer) {
@@ -152,41 +98,8 @@ export const CheckoutModal: React.FC = () => {
       setIsSubmitting(true);
       setSubmitError(null);
 
-      const order = buildOrder({
-        items: items.map((i) => ({
-          wine: {
-            id: i.wine.id,
-            name: i.wine.name,
-            vintage: i.wine.vintage,
-            grapeVariety: i.wine.grapeVariety,
-            bottleSizeCl: i.wine.bottleSizeCl,
-            priceCHF: i.wine.priceCHF,
-            category: i.wine.category,
-            caseSize: i.wine.caseSize,
-            casePriceCHF: i.wine.casePriceCHF,
-            sourceId: i.wine.sourceId,
-            cartonRule: i.wine.cartonRule,
-          },
-          quantity: i.quantity,
-        })),
-        fairContext: {
-          fairId: fairContext.fairId,
-          fairName: fairContext.fairName,
-          booth: fairContext.booth,
-          tabletId: fairContext.tabletId,
-        },
-        seller: {
-          id: chosenSeller.id,
-          name: chosenSeller.name,
-          role: chosenSeller.role,
-        },
-        customer: selectedCustomer,
-        notes: orderNotes.trim() || undefined,
-        idempotencyKey: checkoutSessionKey,
-      });
-
-      // Dauerhaft lokal im Browser speichern mit echter Prüfung & Idempotenz
-      const saveResult = saveStoredOrder(order);
+      const saveResult = simulateCheckout(items.map(i => ({ id: i.wine.id, quantity: i.quantity })),
+        selectedCustomer.id, chosenSeller.id, checkoutSessionKey);
       if (!saveResult.success) {
         throw new Error(saveResult.errorMessage || 'Bestellung konnte im lokalen Speicher nicht verifiziert werden.');
       }
@@ -206,7 +119,7 @@ export const CheckoutModal: React.FC = () => {
       setCheckoutSessionKey(generateIdempotencyKey());
       setSelectedCustomer(null);
       setStep(1);
-      setOrderNotes('');
+      setChosenSeller(null);
     } catch (err: unknown) {
       // Bei Fehler: Warenkorb bleibt unverändert erhalten, kein Erfolgsmodal!
       const message = err instanceof Error ? err.message : 'Unerwarteter Fehler beim Bestellabschluss';
@@ -229,7 +142,7 @@ export const CheckoutModal: React.FC = () => {
               <span className="text-[10px] font-mono uppercase tracking-widest text-gold-300">
                 Tablet POS · Bestellabschluss
               </span>
-              <h2 className="font-serif text-2xl font-bold text-white">Bestellung erfassen</h2>
+              <h2 className="font-serif text-2xl font-bold text-white">Bestellung simulieren</h2>
             </div>
             <button
               onClick={() => !isSubmitting && setIsCheckoutOpen(false)}
@@ -290,7 +203,7 @@ export const CheckoutModal: React.FC = () => {
               <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-mono">
                 3
               </span>
-              <span>3. Prüfen & Senden</span>
+              <span>3. Simulation prüfen</span>
             </button>
           </div>
         </div>
@@ -324,37 +237,7 @@ export const CheckoutModal: React.FC = () => {
           {/* SCHRITT 1: KUNDENAUSWAHL ODER NEUKUNDE */}
           {step === 1 && (
             <div className="space-y-4">
-              {/* Modus-Umschalter: Suchen vs. Neu */}
-              <div className="flex items-center gap-2 p-1 bg-stone-100 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setCustomerMode('search')}
-                  className={`flex-1 py-2 px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                    customerMode === 'search'
-                      ? 'bg-white text-stone-900 shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Bestehende Kunden ({customers.length})</span>
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  title="Öffentliche Demo: ausschliesslich synthetische Beispielkunden"
-                  onClick={() => setCustomerMode('create')}
-                  className={`flex-1 py-2 px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                    customerMode === 'create'
-                      ? 'bg-white text-stone-900 shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
-                  }`}
-                >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  <span>Neukunden in der Demo deaktiviert</span>
-                </button>
-              </div>
-
-              {customerMode === 'search' ? (
+              <p className="text-sm text-stone-600">Bitte einen der synthetischen Beispielkunden auswählen.</p>
                 <div className="space-y-3">
                   {/* Suchfeld */}
                   <div className="relative">
@@ -429,194 +312,6 @@ export const CheckoutModal: React.FC = () => {
                     )}
                   </div>
                 </div>
-              ) : (
-                /* Neukunden-Formular */
-                <form onSubmit={handleCreateCustomerSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Anrede *
-                      </label>
-                      <select
-                        value={formData.salutation}
-                        onChange={(e) =>
-                          setFormData({ ...formData, salutation: e.target.value as Salutation })
-                        }
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      >
-                        <option value="Herr">Herr</option>
-                        <option value="Frau">Frau</option>
-                        <option value="Familie">Familie</option>
-                        <option value="Firma">Firma</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Vorname {formData.salutation !== 'Firma' && '*'}
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="z.B. Beat"
-                        value={formData.firstName || ''}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.firstName && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.firstName}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Nachname *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="z.B. Meier"
-                        value={formData.lastName || ''}
-                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.lastName && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.lastName}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {formData.salutation === 'Firma' && (
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Firmenname *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="z.B. Weinfreunde AG"
-                        value={formData.company || ''}
-                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.company && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.company}</p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Schweizer Adressfelder */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Strasse und Hausnummer *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="z.B. Seestrasse 42"
-                        value={formData.street || ''}
-                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.street && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.street}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Schweizer PLZ *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={4}
-                        placeholder="z.B. 8001"
-                        value={formData.zip || ''}
-                        onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.zip && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.zip}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Ort *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="z.B. Zürich"
-                        value={formData.city || ''}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.city && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.city}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Kanton (optional)
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={2}
-                        placeholder="z.B. ZH"
-                        value={formData.canton || ''}
-                        onChange={(e) => setFormData({ ...formData, canton: e.target.value.toUpperCase() })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs uppercase font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Kontakt */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        E-Mail-Adresse
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="name@domain.ch"
-                        value={formData.email || ''}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.email && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.email}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-semibold text-stone-700 uppercase mb-1">
-                        Telefonnummer
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="+41 79 000 00 00"
-                        value={formData.phone || ''}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                      />
-                      {formErrors.phone && (
-                        <p className="text-[10px] text-red-600 mt-0.5">{formErrors.phone}</p>
-                      )}
-                    </div>
-                  </div>
-                  {formErrors.contact && (
-                    <p className="text-[11px] text-red-600">{formErrors.contact}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full py-2.5 px-4 rounded-xl bg-gold-500 hover:bg-gold-600 text-stone-950 font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition-all"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    <span>Neukunden speichern & übernehmen</span>
-                  </button>
-                </form>
-              )}
             </div>
           )}
 
@@ -664,19 +359,6 @@ export const CheckoutModal: React.FC = () => {
                 })}
               </div>
 
-              {/* Bemerkung zur Bestellung */}
-              <div className="pt-2">
-                <label className="block text-xs font-semibold text-stone-700 uppercase mb-1">
-                  Freitext in der öffentlichen Demo deaktiviert
-                </label>
-                <textarea readOnly
-                  rows={2}
-                  placeholder="z.B. Kunde wünscht Lieferung nach den Ferien ab 1. Dezember..."
-                  value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-wine-800"
-                />
-              </div>
             </div>
           )}
 
@@ -760,11 +442,11 @@ export const CheckoutModal: React.FC = () => {
                       <div>
                         <span className="font-semibold text-stone-900">{i.wine.name}</span>
                         <span className="text-stone-500 font-mono ml-2">
-                          {i.quantity} × {formatCHF(i.wine.priceCHF)}
+                          {i.quantity} × {formatDemoCHF(i.wine.priceCHF)}
                         </span>
                       </div>
                       <span className="font-mono font-bold text-stone-900">
-                        {formatCHF(i.wine.priceCHF * i.quantity)}
+                        {formatDemoCHF(i.wine.priceCHF * i.quantity)}
                       </span>
                     </div>
                   ))}
@@ -773,22 +455,22 @@ export const CheckoutModal: React.FC = () => {
                 <div className="bg-stone-50 p-3 border-t border-stone-200 space-y-1.5">
                   <div className="flex justify-between text-stone-600">
                     <span>Zwischensumme:</span>
-                    <span className="font-mono">{formatCHF(summary.rawSubtotalCHF)}</span>
+                    <span className="font-mono">{formatDemoCHF(summary.rawSubtotalCHF)}</span>
                   </div>
                   {summary.cartonDiscountCHF > 0 && (
                     <div className="flex justify-between text-emerald-700 font-medium">
                       <span>Messe- & Kartonvorteil (unbestätigte Annahme):</span>
-                      <span className="font-mono">-{formatCHF(summary.cartonDiscountCHF)}</span>
+                      <span className="font-mono">-{formatDemoCHF(summary.cartonDiscountCHF)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-stone-500 text-[11px]">
                     <span>Enthaltene MwSt. (8.1% CH):</span>
-                    <span className="font-mono">{formatCHF(summary.mwstCHF)}</span>
+                    <span className="font-mono">{formatDemoCHF(summary.mwstCHF)}</span>
                   </div>
                   <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-base font-bold text-stone-950">
                     <span className="font-serif">Gesamtbetrag (CHF):</span>
                     <span className="font-mono text-xl text-wine-950">
-                      {formatCHF(summary.finalTotalCHF)}
+                      {formatDemoCHF(summary.finalTotalCHF)}
                     </span>
                   </div>
                 </div>
@@ -854,7 +536,7 @@ export const CheckoutModal: React.FC = () => {
               ) : (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                  <span>Demo-Bestellung simulieren ({formatCHF(summary.finalTotalCHF)})</span>
+                  <span>Demo-Bestellung simulieren ({formatDemoCHF(summary.finalTotalCHF)})</span>
                 </>
               )}
             </button>

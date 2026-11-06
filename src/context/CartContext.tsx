@@ -1,3 +1,4 @@
+import { CART_STORAGE_KEY, SELLER_STORAGE_KEY } from '../utils/demoStorage';
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { isOrderableWine, restoreCatalogCart } from '../utils/catalog';
 import { CATALOG } from '../data/catalog';
@@ -40,9 +41,6 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
-const CART_STORAGE_KEY = 'kaisergarten_cart_items';
-const SELLER_STORAGE_KEY = 'kaisergarten_active_seller_id';
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -172,7 +170,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Demo-Messerabatt: Ab 12 Flaschen (5% unbestätigte Annahme)
     const subtotalAfterCases = rawSubtotalRappen - cartonDiscountRappen;
     let messeBonusRappen = 0;
-    if (totalBottles >= 12) {
+    if (totalBottles >= 12 && items.every(i => !i.wine.sourceId)) {
       messeBonusRappen = Math.round(subtotalAfterCases * 0.05);
     }
 

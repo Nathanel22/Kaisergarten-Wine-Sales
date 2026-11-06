@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ShoppingBag, History, UserCheck, ChevronDown } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { useCart } from '../context/CartContext';
-import { formatCHF } from '../utils/formatters';
+import { formatDemoCHF } from '../utils/formatters';
 import { DEMO_TABLET_ID, getDemoFairContext } from '../config/fairContext';
 import { DEMO_SELLERS } from '../config/demoSeller';
 
@@ -130,7 +130,7 @@ export const Navbar: React.FC = () => {
                 Warenkorb
               </div>
               <div className="text-sm font-bold text-gold-200 font-mono leading-none">
-                {formatCHF(summary.finalTotalCHF)}
+                {formatDemoCHF(summary.finalTotalCHF)}
               </div>
             </div>
           </button>

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { formatCHF, formatBottlesSummary } from '../utils/formatters';
+import { formatDemoCHF, formatBottlesSummary } from '../utils/formatters';
 import { X, Trash2, Plus, Minus, Package, ShoppingBag, Truck, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { DEMO_TABLET_ID, getDemoFairContext } from '../config/fairContext';
 
@@ -115,7 +115,7 @@ export const CartDrawer: React.FC = () => {
                   Der Warenkorb ist leer
                 </h4>
                 <p className="text-xs text-stone-500 max-w-xs mb-6">
-                  Wählen Sie aus unserem Weinsortiment Flaschen oder Kartons aus. Wein wird in vollständigen 6er- oder 12er-Kartons geliefert.
+                  Wählen Sie aus unserem Weinsortiment Flaschen oder Kartons aus. In der Simulation lassen sich je sechs Flaschen frei mischen.
                 </p>
                 <button
                   onClick={() => setIsCartOpen(false)}
@@ -199,10 +199,10 @@ export const CartDrawer: React.FC = () => {
                       {/* Line Item Total */}
                       <div className="text-right">
                         <div className="text-xs font-mono font-bold text-stone-900">
-                          {formatCHF(lineTotal)}
+                          {formatDemoCHF(lineTotal)}
                         </div>
                         <div className="text-[10px] text-stone-500 font-mono">
-                          {formatCHF(singlePrice)} / Fl.
+                          {formatDemoCHF(singlePrice)} / Fl.
                         </div>
                       </div>
                     </div>
@@ -232,25 +232,25 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-1.5 text-xs text-stone-600 pt-1">
                 <div className="flex justify-between">
                   <span>Zwischensumme ({summary.totalBottles} Flaschen):</span>
-                  <span className="font-mono text-stone-800">{formatCHF(summary.rawSubtotalCHF)}</span>
+                  <span className="font-mono text-stone-800">{formatDemoCHF(summary.rawSubtotalCHF)}</span>
                 </div>
 
                 {summary.cartonDiscountCHF > 0 && (
                   <div className="flex justify-between text-emerald-700 font-medium">
                     <span>Messe- & Kartonvorteil (unbestätigte Annahme):</span>
-                    <span className="font-mono">-{formatCHF(summary.cartonDiscountCHF)}</span>
+                    <span className="font-mono">-{formatDemoCHF(summary.cartonDiscountCHF)}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between text-stone-500 text-[11px]">
                   <span>Darin enthaltene MwSt. (8.1% CH):</span>
-                  <span className="font-mono">{formatCHF(summary.mwstCHF)}</span>
+                  <span className="font-mono">{formatDemoCHF(summary.mwstCHF)}</span>
                 </div>
 
                 <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-base font-bold text-stone-950">
                   <span className="font-serif">Gesamtbetrag (CHF):</span>
                   <span className="font-mono text-xl text-wine-950">
-                    {formatCHF(summary.finalTotalCHF)}
+                    {formatDemoCHF(summary.finalTotalCHF)}
                   </span>
                 </div>
               </div>
@@ -266,7 +266,7 @@ export const CartDrawer: React.FC = () => {
                     }}
                     className="w-full py-3.5 px-4 rounded-xl bg-wine-900 hover:bg-wine-950 text-white font-bold text-sm shadow-lg shadow-wine-950/20 flex items-center justify-center gap-2 active:scale-98 transition-all"
                   >
-                    <span>Zur Kasse & Bestellung erfassen</span>
+                    <span>Bestellsimulation starten</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (

@@ -1,9 +1,10 @@
+import { hasDemoQuote } from '../config/demoPrices';
 import { PricedWine, Wine, WineFilterState } from '../types/wine';
 import { CartItem } from '../types/cart';
 
 export function isOrderableWine(wine: Wine): wine is PricedWine {
   return typeof wine.priceCHF === 'number' && Number.isFinite(wine.priceCHF) && wine.priceCHF > 0
-    && (!wine.sourceId || (wine.cartonRule === 'standard-6' && wine.caseSize === 6));
+    && hasDemoQuote(wine);
 }
 
 export function orderabilityMessage(wine: Wine): string {

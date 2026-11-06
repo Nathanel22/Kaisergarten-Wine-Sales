@@ -3,7 +3,7 @@ import { isOrderableWine, orderabilityMessage } from '../utils/catalog';
 import React from 'react';
 import { Wine } from '../types/wine';
 import { useCart } from '../context/CartContext';
-import { formatCHF } from '../utils/formatters';
+import { formatDemoCHF } from '../utils/formatters';
 import { Info, Plus, Minus, Package, Award } from 'lucide-react';
 
 interface WineCardProps {
@@ -133,16 +133,16 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
               Preis
             </div>
             <div className="text-xl font-bold font-mono text-stone-900">
-              {wine.priceCHF != null ? formatCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
+              {wine.priceCHF != null ? formatDemoCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
             </div>
           </div>
           {wine.casePriceCHF && (
             <div className="text-right">
               <div className="text-[10px] uppercase font-semibold text-gold-800">
-                {wine.caseSize}er Karton {caseSavings > 0 && <span className="text-emerald-700 font-bold">(-{formatCHF(caseSavings)})</span>}
+                {wine.caseSize}er Karton {caseSavings > 0 && <span className="text-emerald-700 font-bold">(-{formatDemoCHF(caseSavings)})</span>}
               </div>
               <div className="text-sm font-bold font-mono text-stone-700">
-                {formatCHF(wine.casePriceCHF)}
+                {formatDemoCHF(wine.casePriceCHF)}
               </div>
             </div>
           )}
@@ -194,7 +194,7 @@ export const WineCard: React.FC<WineCardProps> = ({ wine }) => {
               disabled={!orderable}
                 onClick={() => addCase(wine)}
               className="disabled:opacity-40 disabled:cursor-not-allowed h-11 px-2.5 sm:px-3 rounded-xl bg-gold-400/20 hover:bg-gold-400/30 border border-gold-400/50 text-gold-950 text-xs font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0"
-              title={`Sofort 1 Karton (${wine.caseSize} Flaschen) hinzufügen`}
+              title={`Sofort 1 Karton (6 simulierte Flaschen) hinzufügen`}
             >
               <Package className="w-3.5 h-3.5 text-gold-800" />
               <span>+{wine.caseSize ?? 6}</span>

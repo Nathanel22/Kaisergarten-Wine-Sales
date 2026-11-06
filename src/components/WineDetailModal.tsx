@@ -2,7 +2,7 @@ import { ProductImage } from './ProductImage';
 import { isOrderableWine } from '../utils/catalog';
 import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { formatCHF } from '../utils/formatters';
+import { formatDemoCHF } from '../utils/formatters';
 import { X, Package, Plus, Check } from 'lucide-react';
 
 export const WineDetailModal: React.FC = () => {
@@ -86,7 +86,7 @@ export const WineDetailModal: React.FC = () => {
               ['Alkohol', wine.alcoholVol != null ? `${wine.alcoholVol}% Vol.` : wine.alcoholNote],
               ['Restzucker', wine.residualSugarGL != null ? `${wine.residualSugarGL} g/l` : null],
               ['Säure', wine.acidityGL != null ? `${wine.acidityGL} g/l` : null],
-              ['Gebinde', wine.packagingNote || (wine.caseSize ? `${wine.caseSize} Flaschen` : null)],
+              ['Gebinde', wine.packagingNote || null],
             ].map(([label, value]) => <div key={String(label)}><dt className="text-xs font-bold text-stone-500">{label}</dt><dd className="text-stone-800 mt-1">{(value ?? '') || 'Nicht angegeben / ungeklärt'}</dd></div>)}
           </dl>
           {!!wine.dataIssues?.length && <div className="text-xs text-stone-600 bg-gold-50 border border-gold-200 rounded-xl p-4"><strong>Hinweise zu den Quelldaten</strong><ul className="list-disc pl-4 mt-2 space-y-1">{wine.dataIssues.map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
@@ -96,18 +96,19 @@ export const WineDetailModal: React.FC = () => {
 
         {/* Footer Actions (Cart Additions) */}
         <div className="p-4 sm:p-6 bg-stone-50 border-t border-stone-200 shrink-0">
+          {orderable && <p className="text-xs text-stone-600 mb-3">Simuliertes Kartongebinde. Tatsächliche Flaschengrösse und Lieferbedingungen sind unbestätigt.</p>}
           {!orderable && <p className="text-xs text-stone-600 mb-3">Derzeit nicht bestellbar. Preis und Gebinde müssen bestätigt sein.</p>}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold font-mono text-wine-950">
-                  {wine.priceCHF != null ? formatCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
+                  {wine.priceCHF != null ? formatDemoCHF(wine.priceCHF) : 'Preis noch nicht hinterlegt'}
                 </span>
                 {wine.priceCHF != null && <span className="text-xs text-stone-500">/ Einzelflasche</span>}
               </div>
               {wine.casePriceCHF && (
                 <div className="text-xs text-gold-900 font-medium">
-                  {wine.caseSize}er Karton: <strong className="font-mono">{formatCHF(wine.casePriceCHF)}</strong>
+                  {wine.caseSize}er Karton: <strong className="font-mono">{formatDemoCHF(wine.casePriceCHF)}</strong>
                 </div>
               )}
             </div>
