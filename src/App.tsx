@@ -1,3 +1,4 @@
+import { SalesOverviewPage } from './features/sales-overview/SalesOverviewPage';
 import { resetDemoData } from './utils/demoStorage';
 import { useState, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
@@ -16,6 +17,7 @@ import { WineFilterState } from './types/wine';
 import { Wine as WineIcon, Search } from 'lucide-react';
 
 export function App() {
+  const [view, setView] = useState<'sale' | 'overview'>('sale');
   const [resetError, setResetError] = useState('');
   function resetSimulation() {
     if (!window.confirm('Lokal erfasste Demokunden, Demo-Bestellungen, Warenkorb und Verkäuferauswahl auf diesem Gerät zurücksetzen?')) return;
@@ -38,9 +40,18 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] pb-24 sm:pb-28">
       {/* Top Navbar */}
       <Navbar />
+      <nav aria-label="Hauptnavigation" className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 flex gap-3">
+        {([['sale', 'Verkauf'], ['overview', 'Verkaufsübersicht']] as const).map(([key, title]) => (
+          <button key={key} type="button" aria-current={view === key ? 'page' : undefined}
+            onClick={() => { setView(key); window.scrollTo(0, 0); }} className={`min-h-[52px] px-5 py-3 rounded-xl font-semibold border ${view === key ? 'bg-wine-900 text-white border-wine-900' : 'bg-white text-wine-900 border-gold-200'}`}>
+            {title}
+          </button>
+        ))}
+      </nav>
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
+        {view === 'overview' ? <SalesOverviewPage /> : <>
         {/* Hero & Promotion Showcase */}
         <HeroBanner />
 
@@ -79,6 +90,7 @@ export function App() {
             </button>
           </div>
         )}
+        </>}
       </main>
 
       {/* Footer */}
@@ -102,7 +114,7 @@ export function App() {
       {/* Modals & Drawers */}
       <WineDetailModal />
       <CartDrawer />
-      <TabletQuickBar />
+      {view === 'sale' && <TabletQuickBar />}
       <CheckoutModal />
       <OrderSuccessModal />
       <OrderHistoryModal />

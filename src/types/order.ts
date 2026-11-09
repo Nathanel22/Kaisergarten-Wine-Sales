@@ -32,6 +32,8 @@ export interface OrderPricingSnapshot {
 
 export interface Order {
   readonly mode: 'SIMULATION';
+  /** Only seeded examples carry this marker; normal test orders never do. */
+  readonly demoScenario?: 'sales-overview-v1';
   readonly id: string; // e.g. "KG-20261105-8492"
   /** Eindeutige Kennung des Checkout-Vorgangs zur Verhinderung von doppelten Bestellungen */
   readonly idempotencyKey: string;

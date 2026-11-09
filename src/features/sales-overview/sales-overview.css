@@ -1,0 +1,33 @@
+/* Verkaufsübersicht – alle Regeln auf .kgso begrenzt. Farben übernehmen die Variablen der Host-App (--kg-*),
+   sonst gelten die Standardwerte (Platzhalter für Dunkelgrün, Gold, Weiss, Hellgrau). */
+.kgso{--c-green:var(--kg-green,#1f4a36);--c-dark:var(--kg-green-dark,#12301f);--c-gold:var(--kg-go,#b08d3c);--c-sf:var(--kg-sf,#fff);--c-bg:var(--kg-bg,#f2f4f1);--c-tx:var(--kg-tx,#1a251f);--c-mu:var(--kg-mu,#65716a);--c-ln:var(--kg-ln,#dde2dd);
+  color:var(--c-tx);font-family:var(--kg-body,Inter,system-ui,sans-serif);padding:24px;max-width:1100px;margin:0 auto}
+.kgso *{box-sizing:border-box}.kgso h2,.kgso h3{font-family:var(--kg-display,'Cormorant Garamond',Georgia,serif);font-weight:600;margin:0}.kgso h2{font-size:2rem}.kgso h3{font-size:1.35rem}
+.kgso-mu{color:var(--c-mu)}.kgso-small{font-size:.85rem}.kgso .n{text-align:right;white-space:nowrap}
+.kgso-demo{background:#b08d3c1f;border:1px solid #b08d3c66;color:#5c4510;border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:.92rem;font-weight:500}
+.kgso-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}.kgso-head p{margin:4px 0 0}
+.kgso-filters{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.kgso-seg{display:flex;gap:8px;flex-wrap:wrap}
+.kgso button.kgso-btn{font:inherit;cursor:pointer;min-height:52px;padding:10px 20px;border-radius:12px;border:1px solid var(--c-ln);font-weight:500;background:var(--c-sf);color:var(--c-tx)}
+.kgso button.kgso-btn.on{background:var(--c-green);border-color:var(--c-green);color:#fff}.kgso button:focus-visible,.kgso select:focus-visible,.kgso-bar:focus-visible{outline:3px solid var(--c-gold);outline-offset:2px}
+.kgso select{font:inherit;min-height:52px;padding:10px 14px;border-radius:12px;border:1px solid var(--c-ln);background:var(--c-sf);color:var(--c-tx);min-width:200px}
+.kgso-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:18px}
+.kgso-card{background:var(--c-sf);border:1px solid var(--c-ln);border-radius:14px;padding:18px;margin-bottom:18px}
+.kgso-kpi{border-top:4px solid var(--c-gold)}.kgso-kpival{white-space:nowrap;font-family:var(--kg-display,Georgia,serif);font-size:2rem;font-weight:600;color:var(--c-green);line-height:1.2}
+.kgso-bars{display:grid;gap:8px}
+.kgso-barhead,.kgso-bar{display:grid;grid-template-columns:minmax(120px,1.1fr) 2fr minmax(110px,.9fr) 90px 80px;gap:12px;align-items:center}
+.kgso-barhead{font-size:.8rem;color:var(--c-mu);padding:0 14px}
+.kgso button.kgso-bar{font:inherit;text-align:left;min-height:60px;padding:8px 14px;border:1px solid var(--c-ln);border-radius:12px;background:var(--c-sf);color:var(--c-tx);cursor:pointer}
+.kgso button.kgso-bar:hover{border-color:var(--c-green);background:#1f4a360a}.kgso-name{font-weight:600}
+.kgso-track{display:block;height:16px;background:var(--c-bg);border-radius:8px;overflow:hidden}.kgso-track span{display:block;height:100%;background:linear-gradient(90deg,var(--c-green),var(--c-gold));border-radius:8px;min-width:0}
+.kgso table{width:100%;border-collapse:collapse;font-size:.95rem}.kgso th,.kgso td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--c-ln)}.kgso th{color:var(--c-mu);font-weight:500}.kgso td.n,.kgso th.n{text-align:right}
+@media (max-width:760px){.kgso{padding:14px}.kgso-barhead{display:none}.kgso-bar{grid-template-columns:1fr 1fr 1fr}.kgso-name{grid-column:1/-1}.kgso-track{grid-column:1/-1}}
+
+/* Use the existing app palette and locally installed typefaces. */
+.kgso{--kg-green:#1f3529;--kg-green-dark:#14271e;--kg-go:#b28945;--kg-bg:#faf8f5;--kg-display:"Playfair Display",Georgia,serif;--kg-body:Inter,system-ui,sans-serif}
+.kgso-table-scroll{overflow-x:auto}.kgso td:first-child{overflow-wrap:anywhere}
+.kgso-scenario{max-width:1052px;margin:0 auto 20px;padding:18px;background:white;border:1px solid #e7dcba;border-radius:14px}
+.kgso-scenario button{min-height:52px;padding:10px 18px;border:1px solid #c5a059;border-radius:12px;margin:8px 8px 0 0;color:#1f3529}
+.kgso-scenario button:disabled{opacity:.5;cursor:not-allowed}
+
+@media (min-width:600px) and (max-width:1000px){.kgso-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
