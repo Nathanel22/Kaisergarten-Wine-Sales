@@ -32,9 +32,9 @@ const approved = readPriceFixture('expovina2026-approved.csv');
 const proposed = readPriceFixture('expovina2026-proposed.csv');
 const paper = [...approved,...proposed];
 assert.equal(approved.length,24);
-assert.equal(proposed.length,12);
-assert.equal(tariffs.length,36);
-assert.equal(new Set(tariffs.map(t => t.shopId)).size,36);
+assert.equal(proposed.length,15);
+assert.equal(tariffs.length,39);
+assert.equal(new Set(tariffs.map(t => t.shopId)).size,39);
 for (const t of tariffs) {
   const row = paper.find(r => Number(r[0]) === t.page && Number(r[1]) === t.row);
   assert.ok(row);
@@ -80,7 +80,7 @@ assert.equal(filterCatalog(CATALOG, { ...baseFilter, category:'spirits' }).lengt
 for (const sortBy of ['price-asc','price-desc','vintage-desc','name-asc']) {
   assert.equal(filterCatalog(CATALOG, { ...baseFilter, sortBy }).length, 67);
 }
-const priced = CATALOG.find(isOrderableWine);
+const priced = CATALOG.find(p => isOrderableWine(p) && p.priceSource === 'DEMO-PREIS');
 const special = CATALOG.find(p => !isOrderableWine(p) && p.priceCHF == null);
 assert.equal(CATALOG.filter(isOrderableWine).length, 55);
 for (const priceCHF of [null, 0, -1, 24, NaN, Infinity]) assert.equal(isOrderableWine({ ...priced, priceCHF }), false);
@@ -115,7 +115,7 @@ globalThis.fetch = denyNetwork;
 globalThis.XMLHttpRequest = class { constructor() { denyNetwork(); } };
 globalThis.WebSocket = globalThis.XMLHttpRequest;
 Object.defineProperty(navigator, 'sendBeacon', { value: denyNetwork, configurable: true });
-const pair = CATALOG.filter(isOrderableWine).slice(0,2);
+const pair = CATALOG.filter(p => isOrderableWine(p) && p.priceSource === 'DEMO-PREIS').slice(0,2);
 const lines = pair.map(p => ({ id:p.id, quantity:3 }));
 const checkout = (items,key) => simulateCheckout(items,'DEMO-CUSTOMER-1',DEMO_SELLERS[0].id,key);
 const first = checkout(lines,'mixed-six');

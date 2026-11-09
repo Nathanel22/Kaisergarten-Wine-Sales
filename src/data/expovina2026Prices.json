@@ -40,6 +40,14 @@
     "priceRappen": 3550
   },
   {
+    "shopId": "1093072",
+    "articleNumber": "09050",
+    "page": 1,
+    "row": 9,
+    "volumeCl": 75.0,
+    "priceRappen": 2590
+  },
+  {
     "shopId": "1092998",
     "articleNumber": "09054",
     "page": 1,
@@ -216,6 +224,14 @@
     "priceRappen": 2990
   },
   {
+    "shopId": "1093076",
+    "articleNumber": "08607",
+    "page": 2,
+    "row": 2,
+    "volumeCl": 75.0,
+    "priceRappen": 2150
+  },
+  {
     "shopId": "1093006",
     "articleNumber": "08602",
     "page": 2,
@@ -230,6 +246,14 @@
     "row": 8,
     "volumeCl": 75.0,
     "priceRappen": 5290
+  },
+  {
+    "shopId": "1092988",
+    "articleNumber": "08630",
+    "page": 2,
+    "row": 10,
+    "volumeCl": 75.0,
+    "priceRappen": 9900
   },
   {
     "shopId": "1093022",

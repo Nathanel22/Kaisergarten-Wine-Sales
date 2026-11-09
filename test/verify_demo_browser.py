@@ -41,8 +41,8 @@ def main(live=False):
         add = page.get_by_role('button', name='+6', exact=True)
         expect(add).to_have_count(67)
         assert sum(add.nth(i).is_enabled() for i in range(67)) == 55
-        expect(page.get_by_text('DEMO-PREIS · CHF 25.00', exact=True)).to_have_count(22)
-        expect(page.get_by_text(re.compile(r'^MESSEPREIS 2026 · CHF \d+\.\d{2}$'))).to_have_count(36)
+        expect(page.get_by_text('DEMO-PREIS · CHF 25.00', exact=True)).to_have_count(19)
+        expect(page.get_by_text(re.compile(r'^MESSEPREIS 2026 · CHF \d+\.\d{2}$'))).to_have_count(39)
         page.get_by_role('button', name='Details', exact=True).first.click()
         expect(page.get_by_text('Simuliertes Kartongebinde.', exact=False)).to_be_visible()
         page.keyboard.press('Escape')
